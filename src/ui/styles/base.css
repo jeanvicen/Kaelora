@@ -243,3 +243,12 @@ input {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Tela "isolada" (vitrine 3D): esconde HUD, rótulos e telas de baixo. */
+#ui.ui-isolated .layer-hud,
+#ui.ui-isolated .world-labels {
+  visibility: hidden;
+}
+.screen.under {
+  visibility: hidden;
+}

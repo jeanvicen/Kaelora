@@ -1,6 +1,7 @@
 import type { App } from '../../app.ts';
+import { albumClaimableCount } from '../../meta/collection.ts';
 import { formatNumber, leagueFor, xpToNext } from '../../meta/economy.ts';
-import { nextGoal } from '../../meta/goals.ts';
+import { evolvableCharacters, nextGoal } from '../../meta/goals.ts';
 import { h, tweenNumber } from '../dom.ts';
 import { icon, type IconName } from '../icons.ts';
 
@@ -28,6 +29,7 @@ export class CityHud {
   private sideButtons: HTMLElement;
   private navButtons = new Map<NavTab, HTMLElement>();
   private chestBadge: HTMLElement;
+  private squadBadge: HTMLElement;
   private lastCoins = -1;
   private lastGems = -1;
   private goalId = '';
@@ -63,6 +65,7 @@ export class CityHud {
 
     this.editBtn = this.sideButton('hammer', 'Editar', () => app.toggleEdit());
     this.chestBadge = h('span', { class: 'badge hidden' });
+    this.squadBadge = h('span', { class: 'badge hidden' });
     this.sideButtons = h(
       'div',
       { class: 'side-buttons' },
@@ -80,8 +83,9 @@ export class CityHud {
       ['more', 'more', 'Mais'],
     ];
     for (const [id, ic, label] of tabs) {
-      const b = h('button', { class: `nav-btn ${id === 'battle' ? 'nav-battle' : ''}`, onClick: () => app.navigate(id) }, h('span', { class: 'nav-ico' }, icon(ic)), h('span', { class: 'nav-label stroke-sm' }, label));
+      const b = h('button', { class: `nav-btn nav-${id}`, onClick: () => app.navigate(id) }, h('span', { class: 'nav-ico' }, icon(ic)), h('span', { class: 'nav-label stroke-sm' }, label));
       if (id === 'chests') b.appendChild(this.chestBadge);
+      if (id === 'squad') b.appendChild(this.squadBadge);
       this.navButtons.set(id, b);
       nav.appendChild(b);
     }
@@ -151,6 +155,9 @@ export class CityHud {
     const n = s.chests.inventory.length;
     this.chestBadge.textContent = String(n);
     this.chestBadge.classList.toggle('hidden', n === 0);
+    const sq = evolvableCharacters(s).length + albumClaimableCount(s);
+    this.squadBadge.textContent = String(sq);
+    this.squadBadge.classList.toggle('hidden', sq === 0);
     this.refreshGoal();
   }
 

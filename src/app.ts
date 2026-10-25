@@ -38,6 +38,8 @@ import type { BattleSim } from './sim/battle.ts';
 import { decodeReplay, encodeReplay, type Replay } from './sim/replay.ts';
 import type { BattleResult } from './sim/types.ts';
 import { openInvasionMap } from './ui/screens/invasion.ts';
+import { openSquad } from './ui/screens/squad.ts';
+import { Showroom } from './render/showroom.ts';
 import { showResult } from './ui/screens/result.ts';
 import { h } from './ui/dom.ts';
 import { CityHud, type NavTab } from './ui/hud/cityHud.ts';
@@ -63,6 +65,9 @@ export class App {
   editBar!: EditBar;
   thumbs!: Thumbnailer;
   battle!: BattleScene;
+  /** Vitrine 3D compartilhada pelas telas de personagens (e baús). */
+  readonly showroom = new Showroom();
+  private showroomStack: { frame: () => DOMRect | null; setup: (s: Showroom) => void }[] = [];
   private battleCtx: { target: BotCity | null; kind: BattleKind; squad: number[]; revengeId?: string } | null = null;
 
   constructor(
@@ -387,6 +392,10 @@ export class App {
       case 'squad':
         this.navigate('squad');
         break;
+      case 'album':
+        this.navigate('city');
+        openSquad(this, 'album');
+        break;
       case 'missions':
         this.openMissions();
         break;
@@ -404,6 +413,11 @@ export class App {
     if (tab === 'city') return;
     if (tab === 'battle') {
       openInvasionMap(this);
+      this.hud.setActive('city');
+      return;
+    }
+    if (tab === 'squad') {
+      openSquad(this);
       this.hud.setActive('city');
       return;
     }
@@ -542,17 +556,46 @@ export class App {
   }
 
   characterPortrait(id: number): Promise<string> {
-    return this.thumbs.request(
-      `c:${id}`,
-      () => {
-        const v = new CharacterView(getCharacter(id));
-        v.face(1, Math.PI / 2 - 0.35);
-        v.shadow.visible = false;
-        v.update(0);
-        return v.root;
-      },
-      { focusY: 0.74, zoom: 0.6, yaw: 0, pitch: 0.1 },
-    );
+    let view: CharacterView | null = null;
+    return this.thumbs
+      .request(
+        `c:${id}`,
+        () => {
+          view = new CharacterView(getCharacter(id));
+          view.face(1, Math.PI / 2 - 0.35);
+          view.shadow.visible = false;
+          view.update(0);
+          return view.root;
+        },
+        { focusY: 0.74, zoom: 0.6, yaw: 0, pitch: 0.1 },
+      )
+      .then((url) => {
+        (view as CharacterView | null)?.dispose();
+        return url;
+      });
+  }
+
+  /** Mostra a vitrine 3D enquadrada num retângulo da tela (empilhável). */
+  pushShowroom(frame: () => DOMRect | null, setup: (s: Showroom) => void): void {
+    this.showroomStack.push({ frame, setup });
+    this.applyShowroom();
+  }
+
+  popShowroom(): void {
+    this.showroomStack.pop();
+    this.applyShowroom();
+  }
+
+  private applyShowroom(): void {
+    const top = this.showroomStack[this.showroomStack.length - 1];
+    if (!top) {
+      this.game.overlay = null;
+      this.showroom.dispose();
+      return;
+    }
+    this.showroom.frame = top.frame;
+    top.setup(this.showroom);
+    this.game.overlay = this.showroom;
   }
 
   openShop(): void {

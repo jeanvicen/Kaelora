@@ -491,20 +491,51 @@ export function characterParts(def: Pick<CharacterDef, 'look' | 'cls'>): Charact
 }
 
 const geoCache = new Map<string, THREE.BufferGeometry>();
+/** Chaves de geometria por personagem, em ordem de uso (LRU). */
+const ownerKeys = new Map<string, string[]>();
+/** Quantas CharacterView vivas usam cada personagem. */
+const ownerRefs = new Map<string, number>();
+const MAX_CACHED_OWNERS = 48;
 
 /** Geometria de uma parte (cacheada por personagem e parte). */
 export function partGeometry(key: string, part: PartModel): THREE.BufferGeometry {
+  const owner = key.slice(0, key.indexOf(':'));
+  const keys = ownerKeys.get(owner) ?? [];
+  ownerKeys.delete(owner);
+  ownerKeys.set(owner, keys);
   let g = geoCache.get(key);
   if (!g) {
     const pivot = part.pivot === 'top' ? 'bottom' : part.pivot;
     const off: [number, number, number] = part.pivot === 'top' ? [0, part.model.grid.sy, 0] : [0, 0, 0];
     g = buildVoxelGeometry(part.model, { scale: CHAR_VOXEL, pivot, offset: off, ao: 0.6 });
     geoCache.set(key, g);
+    keys.push(key);
   }
   return g;
+}
+
+export function retainCharacterGeometry(owner: string): void {
+  ownerRefs.set(owner, (ownerRefs.get(owner) ?? 0) + 1);
+}
+
+/** Solta as geometrias de um personagem; as menos usadas saem do cache. */
+export function releaseCharacterGeometry(owner: string): void {
+  ownerRefs.set(owner, Math.max(0, (ownerRefs.get(owner) ?? 0) - 1));
+  if (ownerKeys.size <= MAX_CACHED_OWNERS) return;
+  for (const [o, keys] of ownerKeys) {
+    if (ownerKeys.size <= MAX_CACHED_OWNERS) break;
+    if ((ownerRefs.get(o) ?? 0) > 0) continue;
+    for (const k of keys) {
+      geoCache.get(k)?.dispose();
+      geoCache.delete(k);
+    }
+    ownerKeys.delete(o);
+    ownerRefs.delete(o);
+  }
 }
 
 export function clearCharacterCache(): void {
   for (const g of geoCache.values()) g.dispose();
   geoCache.clear();
+  ownerKeys.clear();
 }

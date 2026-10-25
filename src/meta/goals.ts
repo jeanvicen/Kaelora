@@ -1,5 +1,7 @@
 import { BUILDINGS, coreLevel, countOf, levelStats, maxCountFor } from './buildings.ts';
 import { generatorAmount, upgradeBlockReason } from './city.ts';
+import { getCharacter } from '../content/catalog.ts';
+import { albumClaimableCount, canStarUp } from './collection.ts';
 import type { BuildingType, SaveData } from './types.ts';
 
 export type GoalAction =
@@ -9,6 +11,7 @@ export type GoalAction =
   | { kind: 'upgrade'; buildingId: string }
   | { kind: 'chests' }
   | { kind: 'squad' }
+  | { kind: 'album' }
   | { kind: 'missions' }
   | { kind: 'repair' }
   | { kind: 'raided' };
@@ -42,6 +45,14 @@ export function nextGoal(save: SaveData, now: number): Goal {
   }
   if (save.chests.inventory.length) {
     return { id: 'open-chest', text: `Abra ${save.chests.inventory.length > 1 ? `seus ${save.chests.inventory.length} baús` : 'seu baú'}`, icon: 'chest', action: { kind: 'chests' } };
+  }
+  const evolvable = evolvableCharacters(save);
+  if (evolvable.length) {
+    const c = getCharacter(evolvable[0]);
+    return { id: `star-${c.id}`, text: `Evolua ${c.name} para ${save.collection[c.id].stars + 1} estrelas`, icon: 'up', action: { kind: 'squad' } };
+  }
+  if (albumClaimableCount(save)) {
+    return { id: 'album', text: 'Resgate o prêmio do Álbum', icon: 'squad', action: { kind: 'album' } };
   }
   const gens = city.buildings.filter((b) => b.type === 'generator');
   for (const g of gens) {
@@ -85,4 +96,11 @@ export function nextGoal(save: SaveData, now: number): Goal {
     }
   }
   return { id: 'raid', text: 'Invada cidades rivais para ganhar baús', icon: 'swords', action: { kind: 'battle' } };
+}
+
+/** Personagens que já podem subir de estrela (esquadrão primeiro). */
+export function evolvableCharacters(save: SaveData): number[] {
+  const ids = Object.keys(save.collection).map(Number);
+  const out = ids.filter((id) => canStarUp(save, id).ok);
+  return out.sort((a, b) => Number(save.squad.includes(b)) - Number(save.squad.includes(a)));
 }

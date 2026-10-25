@@ -1,8 +1,16 @@
+import type * as THREE from 'three';
 import { GameRenderer } from '../render/renderer.ts';
 import { lightUniforms } from '../render/toon.ts';
 import type { GraphicsPreset } from '../meta/types.ts';
 import { TouchInput } from './input.ts';
 import type { GameScene } from './scene.ts';
+
+/** Cena desenhada por cima de tudo (vitrine de personagens, baús). */
+export interface GameOverlay {
+  scene: THREE.Scene;
+  camera: THREE.Camera;
+  update(dt: number, width: number, height: number): void;
+}
 
 /**
  * Loop principal: um único WebGLRenderer, cenas trocáveis, câmera lenta
@@ -22,6 +30,8 @@ export class Game {
   paused = false;
   /** Uma tela opaca cobre o 3D: pula o render (economiza bateria). */
   renderSuspended = false;
+  /** Enquanto existir, substitui a cena atual na tela (a cena fica congelada). */
+  overlay: GameOverlay | null = null;
   fps = 60;
   private fpsAcc = 0;
   private fpsFrames = 0;
@@ -99,7 +109,12 @@ export class Game {
       this.time += rawDt;
       lightUniforms.uTime.value = this.time;
       this.onFrame?.(rawDt);
-      if (this.current) {
+      if (this.overlay) {
+        if (!this.renderSuspended) {
+          this.overlay.update(rawDt, this.renderer.width, this.renderer.height);
+          this.renderer.render(this.overlay.scene, this.overlay.camera);
+        }
+      } else if (this.current) {
         this.current.update(dt, this.time, rawDt);
         if (!this.renderSuspended) this.renderer.render(this.current.scene, this.current.camera);
       }

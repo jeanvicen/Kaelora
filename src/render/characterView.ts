@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { CharacterDef } from '../content/types.ts';
-import { CHAR_VOXEL, characterParts, partGeometry, type PartModel } from './models/characters.ts';
+import { CHAR_VOXEL, characterParts, partGeometry, releaseCharacterGeometry, retainCharacterGeometry, type PartModel } from './models/characters.ts';
 import { createToonMaterial, createVoxelObject, type ToonMaterial } from './toon.ts';
 import { createBlobShadow, radialTexture } from './environment.ts';
 
@@ -44,9 +44,11 @@ export class CharacterView {
   private melee: boolean;
   private staff: boolean;
   scale = 1;
+  private disposed = false;
 
   constructor(def: Pick<CharacterDef, 'id' | 'cls' | 'look'>, opts: { outline?: boolean } = {}) {
     this.def = def;
+    retainCharacterGeometry(String(def.id));
     const parts = characterParts(def);
     this.material = createToonMaterial();
     this.melee = MELEE.has(def.cls);
@@ -225,8 +227,15 @@ export class CharacterView {
   }
 
   dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
     this.material.dispose();
     (this.shadow.material as THREE.Material).dispose();
-    if (this.aura) (this.aura.material as THREE.Material).dispose();
+    this.shadow.geometry.dispose();
+    if (this.aura) {
+      (this.aura.material as THREE.Material).dispose();
+      this.aura.geometry.dispose();
+    }
+    releaseCharacterGeometry(String(this.def.id));
   }
 }

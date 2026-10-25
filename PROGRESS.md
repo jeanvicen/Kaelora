@@ -50,7 +50,21 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 **Bugs conhecidos / observações**
 - Balanceamento inicial: o esquadrão inicial vence com folga cidades-bot de Núcleo 1–2 e perde a partir do Núcleo 4 (sondagem com 400 batalhas headless).
 
-## Fase 3 — Coleção ⏳
+## Fase 3 — Coleção ✅
+
+**Feito**
+- Gerador determinístico dos 1008 personagens (12 classes × 6 elementos × 14 variantes) com distribuição exata de raridades (400/300/180/96/32), nomes únicos por sílabas de elemento com lista de bloqueio, visual voxel único por personagem; `data/characters.json` gerado por `scripts/export-characters.mjs`.
+- 60 personagens feitos à mão (visual, habilidade, falas e história), incluindo os 5 iniciais Comuns e fracos.
+- **Vitrine 3D** (`src/render/showroom.ts`): pódio voxel com néon na cor da raridade, raios de luz girando, brilho e partículas (Épico+, Extremo com aura prismática). Renderizada pelo loop do jogo como overlay (`Game.overlay`) e enquadrada no retângulo de cada tela com view offset da câmera. Telas "isoladas" escondem o HUD e o que está por baixo.
+- **Esquadrão**: os 5 personagens lado a lado nos pódios, etiquetas com nível/estrelas/custo, toque para ver ou trocar, sinergias ativas e dicas das inativas.
+- **Coleção**: grade com as 1008 cartas (silhuetas para os não encontrados), filtros por elemento, raridade e classe, "só os meus", ordenação (poder, raridade, nível, custo), retratos renderizados sob demanda (só o que aparece na tela).
+- **Detalhes**: personagem 3D girando com o dedo, animações de ataque/habilidade/festa com voz, atributos com prévia da próxima estrela, habilidade, vantagem de elemento, história e falas, navegação entre cartas, colocar no esquadrão escolhendo a vaga.
+- **Evolução**: duplicatas viram fragmentos; fragmentos + moedas sobem estrelas (1 a 5, +12% de vida e dano por estrela); XP de batalha sobe nível até o limite do Quartel.
+- **Álbum**: % da coleção total e por elemento, 5 marcos por elemento (10/25/50/75/100%) com moedas, diamantes e baús.
+- Próximo objetivo e selo na barra inferior avisam quando dá para evoluir alguém ou resgatar o Álbum.
+- Cache LRU das geometrias voxel dos personagens (libera memória ao folhear a coleção).
+- Testes: coleção, fragmentos, estrelas, esquadrão, limite do Quartel, álbum e objetivo (50 testes no total).
+
 ## Fase 4 — Baús e Economia ⏳
 ## Fase 5 — Online ⏳
 ## Fase 6 — Retenção ⏳

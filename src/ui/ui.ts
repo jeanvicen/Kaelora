@@ -17,12 +17,33 @@ export class UI {
   readonly modals: HTMLElement;
   readonly toasts: HTMLElement;
   readonly fx: HTMLElement;
-  private screenStack: { el: HTMLElement; onClose?: () => void; opaque: boolean }[] = [];
+  private screenStack: { el: HTMLElement; onClose?: () => void; opaque: boolean; isolate: boolean }[] = [];
   /** Avisado quando muda se há tela opaca cobrindo o 3D. */
   onOpaqueChange: ((covered: boolean) => void) | null = null;
 
   private notifyOpaque(): void {
-    this.onOpaqueChange?.(this.screenStack.some((s) => s.opaque));
+    // De cima para baixo: uma tela opaca cobre o 3D; uma tela "isolada"
+    // transparente esconde o que está abaixo dela e mostra o canvas.
+    let covered = false;
+    let isolated = false;
+    for (let i = this.screenStack.length - 1; i >= 0; i--) {
+      const s = this.screenStack[i];
+      s.el.classList.toggle('under', isolated);
+      if (isolated) continue;
+      if (s.opaque) covered = true;
+      if (s.opaque || s.isolate) isolated = true;
+    }
+    const top = this.screenStack[this.screenStack.length - 1];
+    this.root.classList.toggle('ui-isolated', !!top && top.isolate && !top.opaque);
+    this.onOpaqueChange?.(covered);
+  }
+
+  /** Muda na hora se uma tela aberta cobre o 3D (ex.: abas com e sem vitrine). */
+  setScreenOpaque(el: HTMLElement, opaque: boolean): void {
+    const s = this.screenStack.find((x) => x.el === el);
+    if (!s || s.opaque === opaque) return;
+    s.opaque = opaque;
+    this.notifyOpaque();
   }
 
   constructor(readonly root: HTMLElement) {
@@ -50,13 +71,14 @@ export class UI {
   }
 
   /** Abre uma tela cheia por cima do HUD (com animação de entrada). */
-  openScreen(el: HTMLElement, onClose?: () => void, opaque = true): void {
+  openScreen(el: HTMLElement, onClose?: () => void, opaque = true, isolate = false): void {
     el.classList.add('screen', 'screen-enter');
     this.screens.appendChild(el);
-    this.screenStack.push({ el, onClose, opaque });
+    this.screenStack.push({ el, onClose, opaque, isolate });
     requestAnimationFrame(() => el.classList.remove('screen-enter'));
-    // só esconde o 3D depois da animação de entrada
-    setTimeout(() => this.notifyOpaque(), 260);
+    // só esconde o 3D depois da animação de entrada (a vitrine aparece na hora)
+    if (isolate && !opaque) this.notifyOpaque();
+    else setTimeout(() => this.notifyOpaque(), 260);
     audio.play('open');
   }
 
