@@ -104,6 +104,12 @@ const SINGULAR: [RegExp, string][] = [
   [/baús/, 'baú'],
   [/Núcleos/, 'Núcleo'],
   [/moedas/, 'moeda'],
+  [/batalhas/, 'batalha'],
+  [/ataques/, 'ataque'],
+  [/treinos/, 'treino'],
+  [/duelos/, 'duelo'],
+  [/personagens/, 'personagem'],
+  [/troféus/, 'troféu'],
 ];
 
 /** "Derrube {n} Núcleos" → "Derrube 1 Núcleo" quando a meta é 1. */

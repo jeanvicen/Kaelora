@@ -3,6 +3,7 @@ import { albumClaimableCount } from '../../meta/collection.ts';
 import { activeRevenges, protection } from '../../meta/defense.ts';
 import { freeChestStatus, missionsClaimable } from '../../meta/retention.ts';
 import { moreBadgeCount } from '../screens/more.ts';
+import { achievementsClaimable } from '../../meta/achievements.ts';
 import { formatNumber, leagueFor, xpToNext } from '../../meta/economy.ts';
 import { evolvableCharacters, nextGoal } from '../../meta/goals.ts';
 import { h, tweenNumber } from '../dom.ts';
@@ -34,6 +35,7 @@ export class CityHud {
   private chestBadge: HTMLElement;
   private squadBadge: HTMLElement;
   private moreBadge: HTMLElement;
+  private profileBtn!: HTMLElement;
   private lastCoins = -1;
   private lastGems = -1;
   private goalId = '';
@@ -59,12 +61,12 @@ export class CityHud {
       h('span', { class: 'goal-go' }, icon('play')),
     );
 
-    const profile = h(
+    const profile = (this.profileBtn = h(
       'button',
       { class: 'profile interactive', onClick: () => app.openProfile() },
       h('div', { class: 'lvl-hex' }, this.level),
       h('div', { class: 'p-info' }, this.name, h('div', { class: 'p-xp' }, this.xpBar)),
-    );
+    ));
     const trophyChip = h('button', { class: 'chip trophy-chip interactive', onClick: () => app.openRanking() }, icon('trophy'), this.trophies, this.league);
 
     this.editBtn = this.sideButton('hammer', 'Editar', () => app.toggleEdit());
@@ -166,6 +168,10 @@ export class CityHud {
     this.squadBadge.textContent = String(sq);
     this.squadBadge.classList.toggle('hidden', sq === 0);
     this.setAlert('missions', missionsClaimable(s) > 0 || !s.login.claimedToday);
+    const ach = achievementsClaimable(s) > 0;
+    const dot = this.profileBtn.querySelector('.dot-alert');
+    if (ach && !dot) this.profileBtn.appendChild(h('span', { class: 'dot-alert' }));
+    else if (!ach && dot) dot.remove();
     const more = moreBadgeCount(this.app);
     this.moreBadge.textContent = String(more);
     this.moreBadge.classList.toggle('hidden', more === 0);

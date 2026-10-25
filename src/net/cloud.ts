@@ -116,7 +116,7 @@ export class CloudClient {
     return this.call<{ targets: OnlineTarget[]; save: SaveData }>('matchmaking', { op: 'list', force });
   }
 
-  startBattle(p: { kind: 'raid' | 'revenge' | 'event'; targetKey?: string; revengeId?: string }) {
+  startBattle(p: { kind: 'raid' | 'revenge' | 'event' | 'training'; targetKey?: string; revengeId?: string; difficulty?: string }) {
     return this.call<{ seed: number; target: BotCity; kind: string; event: EventRules | null; save: SaveData }>('matchmaking', { op: 'start', ...p });
   }
 

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "list": [
+    { "id": "vitorias", "title": "Conquistador", "text": "Vença {n} batalhas", "stat": "wins", "tiers": [1, 10, 50, 200], "diamonds": [5, 10, 20, 40] },
+    { "id": "estrelas", "title": "Chuva de Estrelas", "text": "Ganhe {n} estrelas", "stat": "stars", "tiers": [10, 50, 200, 600], "diamonds": [5, 10, 20, 40] },
+    { "id": "nucleos", "title": "Quebra-Núcleos", "text": "Derrube {n} Núcleos", "stat": "coresDestroyed", "tiers": [1, 10, 50, 150], "diamonds": [5, 10, 20, 40] },
+    { "id": "demolidor", "title": "Demolidor", "text": "Destrua {n} construções", "stat": "buildingsDestroyed", "tiers": [25, 150, 600, 2000], "diamonds": [5, 10, 20, 40] },
+    { "id": "baus", "title": "Caçador de Baús", "text": "Abra {n} baús", "stat": "chestsOpened", "tiers": [5, 25, 100, 300], "diamonds": [5, 10, 20, 40] },
+    { "id": "colecao", "title": "Colecionador", "text": "Tenha {n} personagens", "stat": "collection", "tiers": [15, 50, 150, 400], "diamonds": [5, 15, 30, 60] },
+    { "id": "defesas", "title": "Muralha Viva", "text": "Defenda {n} ataques", "stat": "raidsDefended", "tiers": [1, 5, 20, 60], "diamonds": [5, 10, 20, 40] },
+    { "id": "nivel", "title": "Lenda de Kaelora", "text": "Chegue ao nível de conta {n}", "stat": "accountLevel", "tiers": [5, 10, 20, 30], "diamonds": [10, 20, 40, 80] },
+    { "id": "trofeus", "title": "Subindo na Liga", "text": "Alcance {n} troféus", "stat": "bestTrophies", "tiers": [300, 800, 1600, 2600], "diamonds": [10, 20, 40, 80] },
+    { "id": "duelos", "title": "Duelista", "text": "Vença {n} duelos ao vivo", "stat": "duelsWon", "tiers": [1, 5, 25, 100], "diamonds": [10, 20, 40, 80] },
+    { "id": "treino", "title": "Aprendiz Dedicado", "text": "Vença {n} treinos", "stat": "trainingWins", "tiers": [1, 5, 20, 50], "diamonds": [3, 5, 10, 20] }
+  ]
+}

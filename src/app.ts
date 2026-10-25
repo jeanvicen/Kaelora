@@ -32,7 +32,15 @@ import { detectPreset, presetConfig } from './render/renderer.ts';
 import { Thumbnailer } from './render/thumbnailer.ts';
 import { CityScene } from './scenes/city/CityScene.ts';
 import { BattleScene, type BattleKind, type BattleParams } from './scenes/battle/BattleScene.ts';
-import { raidSetupFor, type EventRules } from './content/battleSetup.ts';
+import { buildDuelSetup, raidSetupFor, type EventRules } from './content/battleSetup.ts';
+import { trainingBot, trainingTarget } from './content/training.ts';
+import { RESEARCH, buildSquad } from './content/squad.ts';
+import { ELEMENTS } from './content/classes.ts';
+import { coreLevel } from './meta/buildings.ts';
+import { openTraining } from './ui/screens/training.ts';
+import { openLab } from './ui/screens/lab.ts';
+import { openShop } from './ui/screens/shop.ts';
+import { openProfile } from './ui/screens/profile.ts';
 import type { BotCity } from './content/botCity.ts';
 import { getCharacter } from './content/catalog.ts';
 import { CharacterView } from './render/characterView.ts';
@@ -276,6 +284,16 @@ export class App {
       if (fresh) {
         audio.play('upgradeDone');
         vibrate([30, 40, 60]);
+      }
+    }
+    // pesquisa do Laboratório (online o servidor conclui sozinho na próxima ação)
+    const rq = this.store.data.city.researchQueue;
+    if (rq && rq.endsAt <= now) {
+      const id = this.store.update('finishResearch', (d) => runAction(d, 'finishResearch', {}, { now }));
+      const def = id ? RESEARCH.find((r) => r.id === id) : null;
+      if (def) {
+        audio.play('upgradeDone');
+        this.ui.toast(`Pesquisa concluída: ${def.name}!`, 'good', 'bolt');
       }
     }
     this.hud.refreshGoal();
@@ -662,24 +680,27 @@ export class App {
       return;
     }
     this.hud.setActive('city');
-    this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
   }
 
   openTraining(): void {
-    this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
+    openTraining(this);
+  }
+
+  openLab(): void {
+    openLab(this);
   }
 
   // ------------------------------------------------------------ batalha
 
   /** Invade uma cidade (rival, vingança ou evento). Online, o servidor sorteia a semente. */
-  async startRaid(target: BotCity, kind: BattleKind = 'raid', extra: { revengeId?: string; event?: EventRules; title?: string; targetKey?: string } = {}): Promise<void> {
+  async startRaid(target: BotCity, kind: BattleKind = 'raid', extra: { revengeId?: string; event?: EventRules; title?: string; targetKey?: string; difficulty?: string; tutorial?: boolean } = {}): Promise<void> {
     let seed: number;
     let city = target;
     let event = extra.event;
-    if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event')) {
+    if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event' || kind === 'training')) {
       try {
         await this.netQueue;
-        const r = await this.cloud!.startBattle({ kind, targetKey: extra.targetKey, revengeId: extra.revengeId });
+        const r = await this.cloud!.startBattle({ kind, targetKey: extra.targetKey, revengeId: extra.revengeId, difficulty: extra.difficulty });
         this.adoptServerSave(r.save);
         seed = r.seed;
         city = r.target;
@@ -698,8 +719,32 @@ export class App {
       kind,
       title: { name: extra.title ?? city.ownerName, sub: `${city.name} • Núcleo ${city.coreLevel}`, element: city.element },
       timeOfDay: this.city.clock.t,
-      tutorial: save.stats.battles < 3 ? 1 : 0,
+      tutorial: extra.tutorial || save.stats.battles < 3 ? 1 : 0,
     });
+  }
+
+  /** Treino contra cidade-teste (sem troféus; um pouco de XP e moedas). */
+  startTraining(difficulty: string, tutorial = false): void {
+    const target = trainingTarget(this.save, difficulty, this.online ? 1 : this.act('battleSeed', {}));
+    void this.startRaid(target, 'training', { difficulty, tutorial, title: target.ownerName });
+  }
+
+  /** Duelo de treino contra um bot (treino livre: nada se perde, nada se ganha). */
+  startBotDuel(difficulty: string): void {
+    const save = this.save;
+    const seed = (Date.now() ^ 0x5eed) >>> 0;
+    const bot = trainingBot(save, difficulty, seed);
+    const me = battleSquad(save);
+    const a = buildSquad(me.ids, me.collection, save.city.research).specs;
+    const b = buildSquad(bot.squad, bot.levels, undefined).specs;
+    const setup = buildDuelSetup({
+      seed,
+      level: Math.max(1, Math.min(10, coreLevel(save.city))),
+      a: { name: save.profile.name, element: save.city.element, squad: a, research: save.city.research },
+      b: { name: 'Bot de treino', element: ELEMENTS[seed % ELEMENTS.length], squad: b, bot: { skill: bot.skill } },
+    });
+    this.battleCtx = null;
+    this.launchBattle({ setup, playerTeam: 0, kind: 'training', title: { name: 'Bot de treino', sub: 'Duelo livre • sem prêmios', element: setup.teams[1].element }, timeOfDay: this.city.clock.t });
   }
 
   /** Transição cidade → batalha (1,5 s): mergulho, linhas de velocidade e clarão. */
@@ -810,7 +855,7 @@ export class App {
     let rewards: BattleRewards | null = null;
     if (ctx && params.kind !== 'replay' && params.kind !== 'defense') {
       const kind = ctx.kind === 'event' ? 'event' : ctx.kind === 'revenge' ? 'revenge' : ctx.kind === 'training' ? 'training' : 'raid';
-      if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event')) {
+      if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event' || kind === 'training')) {
         // o servidor re-simula com a semente e as jogadas: o resultado dele é o oficial
         try {
           const r = await this.cloud!.validateBattle(
@@ -918,10 +963,24 @@ export class App {
   }
 
   openShop(): void {
-    this.ui.toast('A Loja chega já já!', 'info', 'shop');
+    if (!isUnlocked(this.save, 'loja')) return this.ui.toast(`A Loja libera no nível de conta ${unlockLevel('loja')}`, 'info', 'lock');
+    openShop(this);
   }
   openProfile(): void {
-    this.ui.toast('O Perfil chega já já!', 'info', 'user');
+    openProfile(this);
+  }
+
+  /** Oferta do dia (pode trazer baú: online o servidor decide o baú). */
+  async buyDealAction(): Promise<ActionResult<'buyDeal'>> {
+    if (!this.online) return this.act('buyDeal', {});
+    await this.netQueue;
+    try {
+      const r = await this.cloud!.action('buyDeal', {});
+      this.adoptServerSave(r.save);
+      return r.result;
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : 'Erro no servidor' };
+    }
   }
   openRanking(): void {
     if (!isUnlocked(this.save, 'ligas')) return this.ui.toast(`Ligas liberam no nível de conta ${unlockLevel('ligas')}`, 'info', 'lock');

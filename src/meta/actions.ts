@@ -27,6 +27,9 @@ import {
   claimPassTier,
   rollover,
 } from './retention.ts';
+import { claimAchievement } from './achievements.ts';
+import { finishResearch, speedUpResearch, startResearch } from './research.ts';
+import { buyCoins, buyDeal } from './shop.ts';
 import { metaRng } from './rng.ts';
 import type { BuildingType, ChestType, Element, SaveData, Settings } from './types.ts';
 
@@ -112,6 +115,30 @@ export const ACTIONS = {
   claimPass: (s: SaveData, a: { tier: number; track: 'free' | 'premium' }, c: ActionCtx) => claimPassTier(s, a.tier, a.track === 'premium' ? 'premium' : 'free', c.now),
   buyPremium: (s: SaveData, _a: Record<string, never>) => buyPremiumPass(s),
   claimEvent: (s: SaveData, a: { wins: number }, c: ActionCtx) => claimEventMilestone(s, a.wins, c.now),
+  // ---------------- conteúdo (Fase 7)
+  startResearch: (s: SaveData, a: { id: string }, c: ActionCtx) => startResearch(s, a.id, c.now),
+  speedupResearch: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => speedUpResearch(s, c.now),
+  finishResearch: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => finishResearch(s, c.now),
+  buyCoins: (s: SaveData, a: { index: number }) => buyCoins(s, a.index),
+  buyDeal: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => buyDeal(s, c.now),
+  claimAchievement: (s: SaveData, a: { id: string }) => claimAchievement(s, a.id),
+  rename: (s: SaveData, a: { name: string }) => {
+    const name = String(a.name ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 16);
+    if (name.length < 2) return bad('Nome muito curto');
+    s.profile.name = name;
+    return { ok: true as const };
+  },
+  avatar: (s: SaveData, a: { id: number }) => {
+    if (!s.collection[a.id]) return bad('Escolha um personagem da sua coleção');
+    s.profile.avatar = a.id;
+    return { ok: true as const };
+  },
+  cityName: (s: SaveData, a: { name: string }) => {
+    const name = String(a.name ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24);
+    if (name.length < 2) return bad('Nome muito curto');
+    s.city.name = name;
+    return { ok: true as const };
+  },
 };
 
 /** Recompensas resgatadas pela Edge Function `claim-reward` (tipo → ação). */
@@ -124,6 +151,7 @@ export const CLAIMS = {
   league: 'claimLeague',
   pass: 'claimPass',
   event: 'claimEvent',
+  achievement: 'claimAchievement',
 } as const satisfies Record<string, keyof typeof ACTIONS>;
 export type ClaimKind = keyof typeof CLAIMS;
 
@@ -156,8 +184,14 @@ export const OPTIMISTIC: ReadonlySet<ActionName> = new Set<ActionName>([
   'settings',
   'defenseSeen',
   'buyPremium',
+  'startResearch',
+  'speedupResearch',
+  'buyCoins',
+  'rename',
+  'avatar',
+  'cityName',
 ]);
 // `finishUpgrades` não vai ao servidor: lá as melhorias terminam sozinhas a cada ação.
 
 /** Ações que o servidor aceita pela função genérica `game-action`. */
-export const CLIENT_ACTIONS: ReadonlySet<ActionName> = new Set<ActionName>([...OPTIMISTIC, 'buyChest', 'raidChoice']);
+export const CLIENT_ACTIONS: ReadonlySet<ActionName> = new Set<ActionName>([...OPTIMISTIC, 'buyChest', 'raidChoice', 'buyDeal']);

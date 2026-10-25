@@ -149,6 +149,7 @@ export class BuildingPanel {
     }
     if (b.type === 'core') actions.append(h('button', { class: 'btn purple small', onClick: () => this.app.openElementPicker() }, 'Trocar elemento'));
     if (b.type === 'barracks') actions.append(h('button', { class: 'btn blue small', onClick: () => this.app.navigate('squad') }, icon('squad'), 'Esquadrão'));
+    if (b.type === 'lab' && !b.ruined) actions.append(h('button', { class: 'btn purple small', onClick: () => this.app.openLab() }, icon('bolt'), 'Pesquisas'));
 
     this.el.replaceChildren(
       h('button', { class: 'close-btn', 'aria-label': 'Fechar', onClick: () => this.app.city.select(null) }, icon('close')),

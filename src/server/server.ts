@@ -5,6 +5,8 @@ import { ELEMENTS } from '../content/classes.ts';
 import { squadPower } from '../content/squad.ts';
 import { CLAIMS, CLIENT_ACTIONS, runAction, type ActionArgs, type ActionName, type ClaimKind } from '../meta/actions.ts';
 import { battleSquad } from '../content/eventSquad.ts';
+import { trainingTarget } from '../content/training.ts';
+import { finishResearch } from '../meta/research.ts';
 import { currentEvent, eventTarget, rollover } from '../meta/retention.ts';
 import { BUILDINGS, canPlace, coreLevel, maxLevel } from '../meta/buildings.ts';
 import { finishUpgrades } from '../meta/city.ts';
@@ -72,6 +74,7 @@ export class GameServer {
       const now = this.clock();
       // melhorias que já acabaram terminam aqui (tolerância de relógio do aparelho)
       finishUpgrades(st.save, now + CLOCK_SKEW);
+      finishResearch(st.save, now + CLOCK_SKEW);
       // virada de dia/semana/temporada (missões, login, liga, evento, passe)
       rollover(st.save, now);
       const out = fn(st, now);
@@ -190,8 +193,8 @@ export class GameServer {
 
   /** Começa uma batalha: o servidor sorteia a semente e guarda a fotografia do alvo. */
   async startBattle(userId: string, rawArgs: unknown) {
-    const a = checkArgs(rawArgs) as { kind?: BattleContext; targetKey?: string; revengeId?: string };
-    const kind: BattleContext = a.kind === 'revenge' ? 'revenge' : a.kind === 'event' ? 'event' : 'raid';
+    const a = checkArgs(rawArgs) as { kind?: BattleContext; targetKey?: string; revengeId?: string; difficulty?: string };
+    const kind: BattleContext = a.kind === 'revenge' ? 'revenge' : a.kind === 'event' ? 'event' : a.kind === 'training' ? 'training' : 'raid';
     // vingança contra jogador real: carrega a cidade atual dele
     let revengeCity: { city: BotCity; ownerId: string | null } | null = null;
     if (kind === 'revenge') {
@@ -211,6 +214,8 @@ export class GameServer {
       if (kind === 'event') {
         target = eventTarget(s.save, now);
         event = currentEvent(now).rules;
+      } else if (kind === 'training') {
+        target = trainingTarget(s.save, String(a.difficulty ?? 'normal'), metaRng(s.save).nextU32());
       } else if (kind === 'revenge') {
         target = revengeCity!.city;
         ownerId = revengeCity!.ownerId;

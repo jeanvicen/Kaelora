@@ -201,6 +201,10 @@ export interface SaveData {
   stats: Stats;
   /** Contador do RNG local de "servidor offline" (baús, saques). */
   rng: { seed: number; counter: number };
+  /** Degraus resgatados de cada conquista. */
+  achievements?: Record<string, number>;
+  /** Loja: dia em que a oferta do dia foi comprada. */
+  shop?: { dealDay: string };
   /** Seleção de alvos de invasão atual (cidades rivais). */
   targets: { seeds: number[]; refreshedAt: number };
 }

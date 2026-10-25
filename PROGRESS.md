@@ -111,5 +111,18 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 **Bugs conhecidos / observações**
 - As notificações agendadas dependem do sistema manter o app vivo em segundo plano; para avisar com o app fechado é preciso Web Push no servidor (próximo passo natural com o Supabase).
 
-## Fase 7 — Conteúdo e polimento ⏳
+## Fase 7 — Conteúdo e polimento ✅
+
+**Feito**
+- **Treinamento**: 4 dificuldades (Fácil, Normal, Difícil, Insano) com cidades-teste no nível relativo ao Núcleo; nada se perde (sem troféus, só um pouco de XP e moedas, validado no servidor online); **duelo contra bot** como treino livre para o Duelo ao vivo; botão **Tutorial guiado** (o tutorial também roda sozinho nas 3 primeiras batalhas).
+- **Laboratório**: tela de pesquisas (as 9 do `research.json`), uma por vez, nível máximo limitado pelo nível do Laboratório, tempo real com aceleração por diamantes; concluídas sozinhas (cliente e servidor).
+- **Loja**: oferta do dia (40% de desconto, a mesma para todos), baús (liberados por nível), moedas por diamantes e pacotes de diamantes exibidos (pagamento com dinheiro de verdade ainda desligado). Aviso de jogo justo.
+- **Perfil**: avatar (qualquer personagem da coleção), nome do jogador e da cidade editáveis, nível/XP, liga, recorde e estatísticas completas; **Conquistas** (`data/achievements.json`) em 4 degraus com diamantes.
+- **Ranking**, **Configurações** e **presets de gráficos** (Baixo/Médio/Alto, aplicados na hora) já estavam prontos; todas as telas com transição animada e som de toque.
+- Selos e alertas: perfil (conquista para resgatar), Missões, Baús, Esquadrão, Mais, Defesas.
+- Testes: laboratório, loja, conquistas, nome/avatar e treinamento (89 testes no total).
+
+**Bugs conhecidos / observações**
+- Compra de diamantes com dinheiro real não está ligada (precisa de um provedor de pagamento).
+
 ## Fase 8 — Multiplayer ao vivo ⏳

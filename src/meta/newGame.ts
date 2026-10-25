@@ -117,6 +117,8 @@ export function newGame(name: string, now: number, graphics: Settings['graphics'
     },
     rng: { seed: randomSeed(), counter: 0 },
     targets: { seeds: [], refreshedAt: 0 },
+    achievements: {},
+    shop: { dealDay: '' },
   };
 }
 
@@ -125,6 +127,8 @@ export function migrateSave(data: SaveData): SaveData {
   // v1 é a primeira versão; futuras migrações entram aqui em sequência.
   if (!data.settings) data.settings = defaultSettings();
   data.settings = { ...defaultSettings(data.settings.graphics), ...data.settings };
+  data.achievements ??= {};
+  data.shop ??= { dealDay: '' };
   data.version = SAVE_VERSION;
   return data;
 }
