@@ -32,7 +32,7 @@
 .ch-inv {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 86px;
+  grid-auto-rows: 78px;
   gap: 7px;
 }
 .ch-slot {
@@ -136,7 +136,7 @@
 .ch-buy {
   position: relative;
   flex: 1;
-  height: 74px;
+  height: 66px;
   border-radius: 14px;
   background: linear-gradient(180deg, #2e2470, #17103f);
   border: 3px solid var(--ink);

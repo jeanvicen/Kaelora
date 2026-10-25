@@ -1,0 +1,664 @@
+/* ============================================================
+   Retenção: diário, login, liga, ranking, evento, passe, "Mais"
+   ============================================================ */
+
+/* ---------- recompensas ---------- */
+.rw-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+}
+.rw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 7px 1px 3px;
+  border-radius: 999px;
+  background: rgba(10, 6, 40, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.rw-chips.small .rw-chip {
+  font-size: 11px;
+}
+.rw-chip .icon {
+  width: 17px;
+  height: 17px;
+}
+.rw-chips:not(.small) .rw-chip {
+  font-size: 15px;
+  padding: 3px 10px 3px 4px;
+}
+.rw-chips:not(.small) .rw-chip .icon {
+  width: 24px;
+  height: 24px;
+}
+.rw-chip.char {
+  color: #ffb3c0;
+}
+
+/* ---------- baú grátis (na fileira da loja) ---------- */
+.ch-free-btn.ready {
+  background: linear-gradient(180deg, #2f9e5a, #17603a);
+  box-shadow:
+    0 0 0 2.5px var(--green),
+    0 0 16px rgba(91, 255, 138, 0.45),
+    0 4px 0 rgba(0, 0, 0, 0.35);
+  animation: legend-pulse 1.6s ease-in-out infinite;
+}
+.ch-free-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+}
+.ch-price.free-ready {
+  color: #c9ffd8;
+}
+
+/* ---------- diário ---------- */
+.daily-panel {
+  width: min(800px, calc(100vw - 24px));
+  max-height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
+}
+.daily-body {
+  display: flex;
+  gap: 14px;
+  padding: 10px 14px 12px;
+  min-height: 0;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+.daily-missions {
+  flex: 1.2;
+  gap: 7px;
+  min-width: 0;
+}
+.daily-login {
+  flex: 1;
+  gap: 7px;
+  min-width: 0;
+}
+.daily-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.daily-title .icon {
+  width: 22px;
+  height: 22px;
+}
+.daily-timer {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  -webkit-text-stroke: 0;
+}
+.mission {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+.mission.ready {
+  border-color: rgba(91, 255, 138, 0.6);
+  box-shadow: 0 0 14px rgba(91, 255, 138, 0.25);
+}
+.mission.claimed {
+  opacity: 0.55;
+}
+.mission.bonus {
+  background: linear-gradient(90deg, rgba(255, 63, 180, 0.18), rgba(10, 6, 40, 0.45));
+}
+.ms-text {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.mission .bar {
+  height: 14px;
+}
+.mission .bar > span {
+  font-size: 9.5px;
+}
+.ms-done {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green-d);
+  border: 2px solid var(--ink);
+  flex: none;
+}
+.ms-done .icon {
+  width: 18px;
+  height: 18px;
+}
+.login-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.login-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 3px 6px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  min-height: 82px;
+}
+.login-day.big {
+  grid-column: span 2;
+  background: linear-gradient(180deg, rgba(255, 201, 60, 0.22), rgba(10, 6, 40, 0.5));
+  border-color: rgba(255, 201, 60, 0.5);
+}
+.login-day.today {
+  border-color: var(--yellow);
+  box-shadow: 0 0 16px rgba(255, 210, 63, 0.45);
+  animation: legend-pulse 1.6s ease-in-out infinite;
+}
+.login-day.done {
+  opacity: 0.55;
+}
+.login-day.future {
+  opacity: 0.85;
+}
+.ld-num {
+  font-weight: 700;
+  font-size: 12px;
+}
+.ld-ico .icon {
+  width: 28px;
+  height: 28px;
+}
+.ld-check {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 6, 40, 0.35);
+  border-radius: 10px;
+  color: var(--green);
+}
+.ld-check .icon {
+  width: 34px;
+  height: 34px;
+}
+.login-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.login-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 700;
+  padding: 8px 0;
+}
+.login-cal {
+  width: min(560px, calc(100vw - 24px));
+}
+.login-cal .panel-body {
+  padding: 10px 14px 12px;
+}
+
+/* ---------- liga e ranking ---------- */
+.league-screen,
+.events-screen,
+.pass-screen {
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 201, 60, 0.15), transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(63, 246, 255, 0.14), transparent 45%),
+    linear-gradient(180deg, #2a1670, #0e0c38);
+}
+.lg-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  padding: 0 calc(12px + var(--safe-r)) calc(10px + var(--safe-b)) calc(12px + var(--safe-l));
+}
+.lg-left {
+  flex: 1.15;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  gap: 6px;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+.lg-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lg-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lg-name {
+  font-size: 20px;
+}
+.lg-me .bar {
+  height: 16px;
+  margin-top: 3px;
+}
+.lg-note {
+  font-size: 11.5px;
+  margin: 0;
+}
+.lg-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.4);
+  font-size: 12px;
+}
+.lg-row.cur {
+  background: rgba(255, 210, 63, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(255, 210, 63, 0.6);
+}
+.league-badge {
+  --lgc: #c98a4c;
+  width: 34px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  clip-path: polygon(50% 0, 100% 22%, 100% 70%, 50% 100%, 0 70%, 0 22%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lgc) 70%, #fff), var(--lgc));
+}
+.league-badge .icon {
+  width: 20px;
+  height: 20px;
+}
+.league-badge.big {
+  width: 64px;
+  height: 72px;
+}
+.league-badge.big .icon {
+  width: 36px;
+  height: 36px;
+}
+.lg-bronze {
+  --lgc: #c98a4c;
+}
+.lg-prata {
+  --lgc: #b9c3de;
+}
+.lg-ouro {
+  --lgc: #ffc93c;
+}
+.lg-diamante {
+  --lgc: #3ff6ff;
+}
+.lg-mestre {
+  --lgc: #a64dff;
+}
+.lg-extremo {
+  --lgc: #ff2a4a;
+}
+.league-reward .league-badge {
+  position: relative;
+}
+.rank-list {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(10, 6, 40, 0.35);
+  font-size: 13px;
+}
+.rank-row.me {
+  background: rgba(63, 246, 255, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(63, 246, 255, 0.6);
+}
+.rank-pos {
+  width: 26px;
+  text-align: center;
+  font-weight: 700;
+}
+.rank-pos.top1 {
+  color: var(--gold);
+}
+.rank-pos.top2 {
+  color: #d6deef;
+}
+.rank-pos.top3 {
+  color: #e2a86c;
+}
+.rank-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.rank-lvl {
+  color: var(--cyan);
+  font-weight: 700;
+  font-size: 11px;
+}
+.rank-tr {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 700;
+  width: 70px;
+  justify-content: flex-end;
+}
+.rank-tr .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- evento ---------- */
+.ev-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  padding: 0 calc(12px + var(--safe-r)) calc(10px + var(--safe-b)) calc(12px + var(--safe-l));
+}
+.ev-card {
+  --elc: var(--pink);
+  position: relative;
+  flex: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  overflow: hidden;
+}
+.ev-rays {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(from var(--spin), color-mix(in srgb, var(--elc) 22%, transparent) 0 10deg, transparent 10deg 20deg);
+  animation: prism-spin 14s linear infinite;
+  pointer-events: none;
+}
+.ev-icon {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--elc) 70%, #fff), var(--elc));
+  border: 3px solid var(--ink);
+}
+.ev-icon .icon {
+  width: 38px;
+  height: 38px;
+}
+.ev-title {
+  position: relative;
+  font-size: 26px;
+  font-weight: 700;
+}
+.ev-text {
+  position: relative;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  max-width: 380px;
+}
+.ev-squad {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+.ev-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  max-width: 56px;
+  text-align: center;
+}
+.ev-loan {
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--purple);
+  font-weight: 700;
+}
+.ev-play {
+  position: relative;
+  margin-top: 4px;
+}
+.ev-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ev-side .panel-body {
+  gap: 7px;
+  padding: 10px 12px;
+}
+.ev-note {
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+
+/* ---------- passe ---------- */
+.ps-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 calc(14px + var(--safe-r)) 6px calc(14px + var(--safe-l));
+}
+.ps-tier {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  font-size: 26px;
+  font-weight: 700;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ff9fde, #ff3fb4);
+  border: 3px solid var(--ink);
+}
+.ps-info .bar {
+  height: 16px;
+  margin: 3px 0;
+}
+.ps-hint {
+  font-size: 11px;
+}
+.ps-ext {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.ps-ext .mini-portrait {
+  width: 46px;
+  height: 46px;
+}
+.ps-prem-on {
+  background: rgba(166, 77, 255, 0.3);
+}
+.ps-track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 6px;
+  padding: 2px calc(14px + var(--safe-r)) calc(10px + var(--safe-b)) calc(14px + var(--safe-l));
+}
+.ps-labels {
+  position: sticky;
+  left: calc(-14px - var(--safe-l));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 26px 8px 0 calc(14px + var(--safe-l));
+  margin-left: calc(-14px - var(--safe-l));
+  background: linear-gradient(90deg, #1f1366 88%, transparent);
+  flex: none;
+}
+.ps-ext-name {
+  font-size: 16px;
+}
+.ps-lbl {
+  flex: 1;
+  width: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  writing-mode: horizontal-tb;
+}
+.ps-lbl.free {
+  background: #2e7d4f;
+}
+.ps-lbl.premium {
+  background: linear-gradient(180deg, #a64dff, #5a1fb8);
+}
+.ps-col {
+  flex: none;
+  width: 98px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ps-num {
+  height: 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-faint);
+}
+.ps-col.on .ps-num {
+  color: var(--yellow);
+}
+.ps-cell {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+.ps-cell.premium {
+  background: rgba(90, 31, 184, 0.28);
+}
+.ps-cell.ready {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(91, 255, 138, 0.35);
+}
+.ps-cell.claimed {
+  opacity: 0.5;
+}
+.ps-cell.locked .rw-chips,
+.ps-cell.locked .ps-char {
+  filter: grayscale(0.7) brightness(0.7);
+}
+.ps-lock {
+  color: var(--text-faint);
+}
+.ps-lock .icon {
+  width: 20px;
+  height: 20px;
+}
+.ps-col.final .ps-cell.premium {
+  background: linear-gradient(180deg, rgba(255, 42, 74, 0.35), rgba(90, 31, 184, 0.3));
+  border-color: rgba(255, 42, 74, 0.6);
+}
+
+/* ---------- menu "Mais" ---------- */
+.more-panel {
+  width: min(680px, calc(100vw - 24px));
+}
+.more-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px 14px 14px;
+}
+.more-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #3a2c86, #1a1248);
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  transition: transform var(--t-fast) var(--ease-out);
+}
+.more-item:active {
+  transform: scale(0.95);
+}
+.more-item b {
+  font-size: 15px;
+}
+.more-item.locked {
+  opacity: 0.55;
+}
+.more-ico .icon {
+  width: 32px;
+  height: 32px;
+}
+.more-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+}

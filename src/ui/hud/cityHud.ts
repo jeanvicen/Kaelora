@@ -1,6 +1,8 @@
 import type { App } from '../../app.ts';
 import { albumClaimableCount } from '../../meta/collection.ts';
 import { activeRevenges, protection } from '../../meta/defense.ts';
+import { freeChestStatus, missionsClaimable } from '../../meta/retention.ts';
+import { moreBadgeCount } from '../screens/more.ts';
 import { formatNumber, leagueFor, xpToNext } from '../../meta/economy.ts';
 import { evolvableCharacters, nextGoal } from '../../meta/goals.ts';
 import { h, tweenNumber } from '../dom.ts';
@@ -31,6 +33,7 @@ export class CityHud {
   private navButtons = new Map<NavTab, HTMLElement>();
   private chestBadge: HTMLElement;
   private squadBadge: HTMLElement;
+  private moreBadge: HTMLElement;
   private lastCoins = -1;
   private lastGems = -1;
   private goalId = '';
@@ -67,6 +70,7 @@ export class CityHud {
     this.editBtn = this.sideButton('hammer', 'Editar', () => app.toggleEdit());
     this.chestBadge = h('span', { class: 'badge hidden' });
     this.squadBadge = h('span', { class: 'badge hidden' });
+    this.moreBadge = h('span', { class: 'badge hidden' });
     this.sideButtons = h(
       'div',
       { class: 'side-buttons' },
@@ -88,6 +92,7 @@ export class CityHud {
       const b = h('button', { class: `nav-btn nav-${id}`, onClick: () => app.navigate(id) }, h('span', { class: 'nav-ico' }, icon(ic)), h('span', { class: 'nav-label stroke-sm' }, label));
       if (id === 'chests') b.appendChild(this.chestBadge);
       if (id === 'squad') b.appendChild(this.squadBadge);
+      if (id === 'more') b.appendChild(this.moreBadge);
       this.navButtons.set(id, b);
       nav.appendChild(b);
     }
@@ -154,12 +159,16 @@ export class CityHud {
     this.name.textContent = p.name;
     this.trophies.textContent = formatNumber(p.trophies);
     this.league.textContent = leagueFor(p.trophies).name;
-    const n = s.chests.inventory.length;
+    const n = s.chests.inventory.length + freeChestStatus(s, Date.now()).ready;
     this.chestBadge.textContent = String(n);
     this.chestBadge.classList.toggle('hidden', n === 0);
     const sq = evolvableCharacters(s).length + albumClaimableCount(s);
     this.squadBadge.textContent = String(sq);
     this.squadBadge.classList.toggle('hidden', sq === 0);
+    this.setAlert('missions', missionsClaimable(s) > 0 || !s.login.claimedToday);
+    const more = moreBadgeCount(this.app);
+    this.moreBadge.textContent = String(more);
+    this.moreBadge.classList.toggle('hidden', more === 0);
     // defesas: alerta de ataque não visto / vingança aberta; rótulo com o escudo
     const now = Date.now();
     this.setAlert('defense', s.raids.log.some((e) => !e.seen) || activeRevenges(s, now).length > 0 || !!s.raids.pendingChoice);

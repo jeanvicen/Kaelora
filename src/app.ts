@@ -6,7 +6,17 @@ import { Game, type GameOverlay } from './core/game.ts';
 import { loadSave } from './core/save.ts';
 import { Store } from './core/store.ts';
 import { BUILDINGS, levelStats } from './meta/buildings.ts';
-import { OPTIMISTIC, runAction, type ActionArgs, type ActionName, type ActionResult } from './meta/actions.ts';
+import { CLAIMS, OPTIMISTIC, runAction, type ActionArgs, type ActionName, type ActionResult, type ClaimKind } from './meta/actions.ts';
+import { battleSquad } from './content/eventSquad.ts';
+import { currentEvent, eventTarget } from './meta/retention.ts';
+import { dayKey, seasonOf, weekKey } from './meta/time.ts';
+import { ECONOMY, isUnlocked, unlockLevel } from './meta/economy.ts';
+import { openDaily, showDailyIfNeeded } from './ui/screens/daily.ts';
+import { openLeague } from './ui/screens/league.ts';
+import { openEvents } from './ui/screens/events.ts';
+import { openPass } from './ui/screens/pass.ts';
+import { openMore } from './ui/screens/more.ts';
+import { notifyNow, scheduleNotifications } from './core/notify.ts';
 import type { ChestResult } from './meta/chests.ts';
 import { CloudClient, CloudError, type OnlineTarget } from './net/cloud.ts';
 import { openRevengeWall, revengeCity, showDefenseReport, showRaidChoice } from './ui/screens/defense.ts';
@@ -180,9 +190,14 @@ export class App {
     this.tick();
     // invasões enquanto o jogador estava fora
     if (this.online) {
-      this.cloud!.watchRaids(() => void this.resync());
+      this.cloud!.watchRaids(() => {
+        notifyNow('Sua cidade foi atacada!', 'Veja o replay e decida: retomar ou reconstruir.', 'raid');
+        void this.resync();
+      });
       setTimeout(() => this.onDefenses(defenses), 1200);
     } else setTimeout(() => this.checkOfflineRaids(), 1200);
+    setTimeout(() => showDailyIfNeeded(this), 2600);
+    scheduleNotifications(this);
     setInterval(() => (this.online ? void this.resync() : this.checkOfflineRaids()), 5 * 60_000);
     this.registerServiceWorker();
     this.canvas.addEventListener('pointerdown', () => audio.unlock(), { once: true });
@@ -243,6 +258,7 @@ export class App {
   /** Relógio de 1 s: conclui melhorias e atualiza o objetivo. */
   private tick(): void {
     const now = Date.now();
+    this.checkRollover();
     this.showPendingLevelUp();
     const done = this.store.data.city.buildings.filter((b) => b.upgradeEndsAt && b.upgradeEndsAt <= now);
     if (done.length) {
@@ -388,6 +404,39 @@ export class App {
     const r = await this.cloud!.matchmaking(force);
     this.adoptServerSave(r.save);
     return r.targets;
+  }
+
+  /** Resgata uma recompensa (missão, login, baú grátis, liga, passe, evento, álbum). */
+  async claim<K extends ClaimKind>(kind: K, args: ActionArgs<(typeof CLAIMS)[K]>): Promise<ActionResult<(typeof CLAIMS)[K]>> {
+    const name = CLAIMS[kind];
+    if (!this.online) return this.act(name, args);
+    await this.netQueue;
+    try {
+      const r = await this.cloud!.claimReward({ kind, ...(args as object) });
+      this.adoptServerSave(r.save);
+      return r.result as ActionResult<(typeof CLAIMS)[K]>;
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : 'Erro no servidor' } as ActionResult<(typeof CLAIMS)[K]>;
+    }
+  }
+
+  /** Virada de dia/semana/temporada: missões novas, login, liga, evento e passe. */
+  private checkRollover(): void {
+    const now = Date.now();
+    const s = this.save;
+    if (s.missions.day === dayKey(now) && s.league.week === weekKey(now) && s.pass.season === seasonOf(now, ECONOMY.pass.seasonDays)) return;
+    if (this.online) void this.resync().then(() => showDailyIfNeeded(this));
+    else {
+      this.act('rollover', {});
+      showDailyIfNeeded(this);
+    }
+  }
+
+  /** Batalha do evento semanal (regras especiais). */
+  startEvent(): void {
+    const now = Date.now();
+    const ev = currentEvent(now);
+    void this.startRaid(eventTarget(this.save, now), 'event', { event: ev.rules, title: ev.title });
   }
 
   // ------------------------------------------------------------ cidade
@@ -607,6 +656,11 @@ export class App {
       this.hud.setActive('city');
       return;
     }
+    if (tab === 'more') {
+      openMore(this);
+      this.hud.setActive('city');
+      return;
+    }
     this.hud.setActive('city');
     this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
   }
@@ -621,21 +675,23 @@ export class App {
   async startRaid(target: BotCity, kind: BattleKind = 'raid', extra: { revengeId?: string; event?: EventRules; title?: string; targetKey?: string } = {}): Promise<void> {
     let seed: number;
     let city = target;
-    if (this.online && (kind === 'raid' || kind === 'revenge')) {
+    let event = extra.event;
+    if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event')) {
       try {
         await this.netQueue;
         const r = await this.cloud!.startBattle({ kind, targetKey: extra.targetKey, revengeId: extra.revengeId });
         this.adoptServerSave(r.save);
         seed = r.seed;
         city = r.target;
+        event = r.event ?? undefined;
       } catch (e) {
         this.ui.toast(e instanceof Error ? e.message : 'Erro no servidor', 'error');
         return;
       }
     } else seed = this.act('battleSeed', {});
     const save = this.save;
-    const setup = raidSetupFor(save, city, seed, extra.event);
-    this.battleCtx = { target: city, kind, squad: [...save.squad], revengeId: extra.revengeId };
+    const setup = raidSetupFor(save, city, seed, event);
+    this.battleCtx = { target: city, kind, squad: battleSquad(save, event?.element).ids, revengeId: extra.revengeId };
     this.launchBattle({
       setup,
       playerTeam: 0,
@@ -754,7 +810,7 @@ export class App {
     let rewards: BattleRewards | null = null;
     if (ctx && params.kind !== 'replay' && params.kind !== 'defense') {
       const kind = ctx.kind === 'event' ? 'event' : ctx.kind === 'revenge' ? 'revenge' : ctx.kind === 'training' ? 'training' : 'raid';
-      if (this.online && (kind === 'raid' || kind === 'revenge')) {
+      if (this.online && (kind === 'raid' || kind === 'revenge' || kind === 'event')) {
         // o servidor re-simula com a semente e as jogadas: o resultado dele é o oficial
         try {
           const r = await this.cloud!.validateBattle(
@@ -862,16 +918,26 @@ export class App {
   }
 
   openShop(): void {
-    this.navigate('more');
+    this.ui.toast('A Loja chega já já!', 'info', 'shop');
   }
   openProfile(): void {
-    this.navigate('more');
+    this.ui.toast('O Perfil chega já já!', 'info', 'user');
   }
   openRanking(): void {
-    this.navigate('more');
+    if (!isUnlocked(this.save, 'ligas')) return this.ui.toast(`Ligas liberam no nível de conta ${unlockLevel('ligas')}`, 'info', 'lock');
+    openLeague(this);
   }
   openMissions(): void {
-    this.navigate('more');
+    openDaily(this);
+  }
+  openEvents(): void {
+    openEvents(this);
+  }
+  openPass(): void {
+    openPass(this);
+  }
+  openDuel(): void {
+    this.ui.toast('O Duelo ao vivo chega já já!', 'info', 'versus');
   }
   openSettings(): void {
     openSettings(this);

@@ -3,6 +3,7 @@ import { BUILDINGS, distanceToEntrance, gridSizeForCore, levelStats } from '../m
 import type { Element, PlacedBuilding, SaveData } from '../meta/types.ts';
 import { TICK_RATE, TILE, type BattleSetup, type StructureKind, type StructureSpec, type TeamSetup, type UnitSpec } from '../sim/types.ts';
 import type { BotCity } from './botCity.ts';
+import { battleSquad } from './eventSquad.ts';
 import { buildSquad, researchValue } from './squad.ts';
 
 const BATTLE = (economyJson as unknown as {
@@ -18,6 +19,8 @@ export interface EventRules {
   energyRegenPct?: number;
   durationSec?: number;
   attackerHpPct?: number;
+  /** Só personagens deste elemento (o evento empresta quem faltar). */
+  element?: Element;
 }
 
 export interface CityLayout {
@@ -230,7 +233,8 @@ export function raidSetupFor(
   seed: number,
   event?: EventRules,
 ): BattleSetup {
-  const { specs } = buildSquad(save.squad, save.collection, save.city.research, { eventHpPct: event?.attackerHpPct });
+  const sq = battleSquad(save, event?.element);
+  const { specs } = buildSquad(sq.ids, sq.collection, save.city.research, { eventHpPct: event?.attackerHpPct });
   return buildRaidSetup({
     seed,
     attacker: { name: save.profile.name, element: save.city.element, squad: specs, research: save.city.research },

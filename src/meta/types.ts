@@ -189,10 +189,11 @@ export interface SaveData {
     seenChestIntro: Record<string, boolean>;
     lastGoal: string;
   };
-  missions: { day: string; list: MissionState[] };
+  missions: { day: string; list: MissionState[]; bonusClaimed?: boolean };
   login: { lastDay: string; streak: number; claimedToday: boolean };
   pass: { season: number; xp: number; premium: boolean; claimedFree: number[]; claimedPremium: number[] };
-  league: { week: string; startTrophies: number; rewardsClaimed: string[] };
+  /** `pending`: recompensa da liga da semana que acabou, esperando o resgate. */
+  league: { week: string; startTrophies: number; rewardsClaimed: string[]; pending?: { week: string; leagueId: string } | null };
   events: { week: string; wins: number; claimed: number[] };
   album: { claimed: string[] };
   raids: RaidStatus;

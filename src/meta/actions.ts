@@ -16,6 +16,17 @@ import {
 import { claimAlbum, setSquadSlot, starUp } from './collection.ts';
 import { chooseRetake, markDefenseSeen, processOfflineRaids, rebuildCity } from './defense.ts';
 import { applyBattleResult, consumeTarget, invasionTargets, refreshCost, type BattleContext } from './raids.ts';
+import {
+  buyPremiumPass,
+  claimEventMilestone,
+  claimFreeChest,
+  claimLeague,
+  claimLogin,
+  claimMission,
+  claimMissionBonus,
+  claimPassTier,
+  rollover,
+} from './retention.ts';
 import { metaRng } from './rng.ts';
 import type { BuildingType, ChestType, Element, SaveData, Settings } from './types.ts';
 
@@ -91,7 +102,30 @@ export const ACTIONS = {
     return true;
   },
   raidChoice: (s: SaveData, a: { choice: 'rebuild' | 'retake' }, c: ActionCtx) => (a.choice === 'rebuild' ? rebuildCity(s, c.now) : chooseRetake(s)),
+  // ---------------- retenção (Fase 6)
+  rollover: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => rollover(s, c.now),
+  claimMission: (s: SaveData, a: { id: string }, c: ActionCtx) => claimMission(s, a.id, c.now),
+  claimMissionBonus: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => claimMissionBonus(s, c.now),
+  claimLogin: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => claimLogin(s, c.now),
+  claimFreeChest: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => claimFreeChest(s, c.now),
+  claimLeague: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => claimLeague(s, c.now),
+  claimPass: (s: SaveData, a: { tier: number; track: 'free' | 'premium' }, c: ActionCtx) => claimPassTier(s, a.tier, a.track === 'premium' ? 'premium' : 'free', c.now),
+  buyPremium: (s: SaveData, _a: Record<string, never>) => buyPremiumPass(s),
+  claimEvent: (s: SaveData, a: { wins: number }, c: ActionCtx) => claimEventMilestone(s, a.wins, c.now),
 };
+
+/** Recompensas resgatadas pela Edge Function `claim-reward` (tipo → ação). */
+export const CLAIMS = {
+  album: 'albumClaim',
+  mission: 'claimMission',
+  missionBonus: 'claimMissionBonus',
+  login: 'claimLogin',
+  freeChest: 'claimFreeChest',
+  league: 'claimLeague',
+  pass: 'claimPass',
+  event: 'claimEvent',
+} as const satisfies Record<string, keyof typeof ACTIONS>;
+export type ClaimKind = keyof typeof CLAIMS;
 
 export type ActionName = keyof typeof ACTIONS;
 export type ActionArgs<K extends ActionName> = Parameters<(typeof ACTIONS)[K]>[1];
@@ -118,10 +152,10 @@ export const OPTIMISTIC: ReadonlySet<ActionName> = new Set<ActionName>([
   'element',
   'starUp',
   'squadSlot',
-  'albumClaim',
   'chestSeen',
   'settings',
   'defenseSeen',
+  'buyPremium',
 ]);
 // `finishUpgrades` não vai ao servidor: lá as melhorias terminam sozinhas a cada ação.
 

@@ -1,4 +1,5 @@
 import type { RealtimeChannel, Session, SupabaseClient } from '@supabase/supabase-js';
+import type { EventRules } from '../content/battleSetup.ts';
 import type { BotCity } from '../content/botCity.ts';
 import type { ActionArgs, ActionName, ActionResult } from '../meta/actions.ts';
 import type { BattleRewards } from '../meta/raids.ts';
@@ -115,8 +116,8 @@ export class CloudClient {
     return this.call<{ targets: OnlineTarget[]; save: SaveData }>('matchmaking', { op: 'list', force });
   }
 
-  startBattle(p: { kind: 'raid' | 'revenge'; targetKey?: string; revengeId?: string }) {
-    return this.call<{ seed: number; target: BotCity; kind: string; save: SaveData }>('matchmaking', { op: 'start', ...p });
+  startBattle(p: { kind: 'raid' | 'revenge' | 'event'; targetKey?: string; revengeId?: string }) {
+    return this.call<{ seed: number; target: BotCity; kind: string; event: EventRules | null; save: SaveData }>('matchmaking', { op: 'start', ...p });
   }
 
   validateBattle(commands: TimedCommand[], hash: number) {
@@ -129,6 +130,13 @@ export class CloudClient {
 
   claimReward(p: Record<string, unknown>) {
     return this.call<{ result: unknown; save: SaveData }>('claim-reward', p);
+  }
+
+  /** Ranking global (view `leaderboards`). */
+  async leaderboard(limit = 100): Promise<{ user_id: string; name: string; account_level: number; trophies: number; league: string; position: number }[]> {
+    const { data, error } = await this.sb.from('leaderboards').select('user_id, name, account_level, trophies, league, position').limit(limit);
+    if (error) throw new CloudError(error.message);
+    return data ?? [];
   }
 
   /** Avisa na hora quando a cidade do jogador é atacada. */

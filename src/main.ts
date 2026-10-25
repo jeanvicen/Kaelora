@@ -6,6 +6,7 @@ import './ui/styles/screens.css';
 import './ui/styles/battle.css';
 import './ui/styles/collection.css';
 import './ui/styles/chests.css';
+import './ui/styles/retention.css';
 import { App } from './app.ts';
 import { initInstallPrompt } from './core/device.ts';
 

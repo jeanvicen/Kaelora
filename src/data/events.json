@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "milestones": [
+    { "wins": 1, "reward": { "coins": 600 } },
+    { "wins": 3, "reward": { "chest": "prata", "diamonds": 10 } },
+    { "wins": 5, "reward": { "chest": "ouro", "diamonds": 25 } }
+  ],
+  "templates": [
+    { "id": "nucleo-tita", "title": "Núcleo Titã", "text": "Os Núcleos rivais estão com o DOBRO de vida. Traga força bruta!", "icon": "shield", "rules": { "coreHpPct": 100 } },
+    { "id": "energia-turbo", "title": "Energia Turbo", "text": "Sua energia recarrega 60% mais rápido. Despeje cartas sem dó!", "icon": "energy", "rules": { "energyRegenPct": 60 } },
+    { "id": "torres-furiosas", "title": "Torres Furiosas", "text": "Torres causam +50% de dano, mas seu esquadrão ganha +30% de vida.", "icon": "flame", "rules": { "towerDmgPct": 50, "attackerHpPct": 30 } },
+    { "id": "blitz", "title": "Blitz de 90 s", "text": "Batalhas de só 90 segundos. Derrube o Núcleo antes do tempo acabar!", "icon": "clock", "rules": { "durationSec": 90, "energyRegenPct": 25 } },
+    { "id": "so-volt", "title": "Semana Volt", "text": "Só personagens Volt! Quem faltar no seu esquadrão, o evento empresta.", "icon": "bolt", "rules": { "element": "volt", "attackerHpPct": 15 } },
+    { "id": "so-solar", "title": "Semana Solar", "text": "Só personagens Solar! Quem faltar no seu esquadrão, o evento empresta.", "icon": "flame", "rules": { "element": "solar", "attackerHpPct": 15 } },
+    { "id": "so-raiz", "title": "Semana Raiz", "text": "Só personagens Raiz! Quem faltar no seu esquadrão, o evento empresta.", "icon": "heal", "rules": { "element": "raiz", "attackerHpPct": 15 } },
+    { "id": "so-mare", "title": "Semana Maré", "text": "Só personagens Maré! Quem faltar no seu esquadrão, o evento empresta.", "icon": "gem", "rules": { "element": "mare", "attackerHpPct": 15 } },
+    { "id": "so-cristal", "title": "Semana Cristal", "text": "Só personagens Cristal! Quem faltar no seu esquadrão, o evento empresta.", "icon": "gem", "rules": { "element": "cristal", "attackerHpPct": 15 } },
+    { "id": "so-sombra", "title": "Semana Sombra", "text": "Só personagens Sombra! Quem faltar no seu esquadrão, o evento empresta.", "icon": "skull", "rules": { "element": "sombra", "attackerHpPct": 15 } }
+  ]
+}

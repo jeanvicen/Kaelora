@@ -10,6 +10,7 @@ import {
   newBuildingId,
 } from './buildings.ts';
 import { ECONOMY, addAccountXp, speedupCost } from './economy.ts';
+import { trackMission } from './missions.ts';
 import type { BuildingType, PlacedBuilding, SaveData } from './types.ts';
 
 export const MAX_BUILDERS = 2;
@@ -107,6 +108,7 @@ export function startUpgrade(save: SaveData, id: string, now: number): CityResul
   if (block) return fail(block);
   const next = levelStats(b.type, b.level + 1);
   save.currencies.coins -= next.cost;
+  trackMission(save, 'upgrade_any', 1);
   if (next.time <= 0) {
     completeUpgrade(save, b, now);
   } else {
@@ -185,6 +187,7 @@ export function collect(save: SaveData, id: string, now: number): number {
   if (amount <= 0) return 0;
   save.currencies.coins += amount;
   b.lastCollectAt = now;
+  trackMission(save, 'collect_coins', amount);
   return amount;
 }
 

@@ -3,10 +3,11 @@ import { generateBotCity, suggestedBotLevel, type BotCity } from '../content/bot
 import { findCharacter } from '../content/catalog.ts';
 import { ELEMENTS } from '../content/classes.ts';
 import { squadPower } from '../content/squad.ts';
-import { CLIENT_ACTIONS, runAction, type ActionArgs, type ActionName } from '../meta/actions.ts';
+import { CLAIMS, CLIENT_ACTIONS, runAction, type ActionArgs, type ActionName, type ClaimKind } from '../meta/actions.ts';
+import { battleSquad } from '../content/eventSquad.ts';
+import { currentEvent, eventTarget, rollover } from '../meta/retention.ts';
 import { BUILDINGS, canPlace, coreLevel, maxLevel } from '../meta/buildings.ts';
 import { finishUpgrades } from '../meta/city.ts';
-import { claimAlbum } from '../meta/collection.ts';
 import { openChest } from '../meta/chests.ts';
 import { applyRaidOnPlayer, canBeRaided, coinsAtRisk, processOfflineRaids, replayCommands } from '../meta/defense.ts';
 import { ECONOMY } from '../meta/economy.ts';
@@ -71,6 +72,8 @@ export class GameServer {
       const now = this.clock();
       // melhorias que já acabaram terminam aqui (tolerância de relógio do aparelho)
       finishUpgrades(st.save, now + CLOCK_SKEW);
+      // virada de dia/semana/temporada (missões, login, liga, evento, passe)
+      rollover(st.save, now);
       const out = fn(st, now);
       st.version = prev + 1;
       try {
@@ -136,13 +139,12 @@ export class GameServer {
     return { result: out, save: toClient(st.save) };
   }
 
-  /** Recompensas (`claim-reward`): álbum (e, na Fase 6, missões, passe, ligas...). */
+  /** Recompensas (`claim-reward`): álbum, missões, login, baú grátis, liga, passe, evento. */
   async claimReward(userId: string, rawArgs: unknown) {
-    const a = checkArgs(rawArgs) as { kind?: string; element?: Element; pct?: number };
-    const { st, out } = await this.withState(userId, (s, now) => {
-      if (a.kind === 'album') return claimAlbum(s.save, a.element as Element, Number(a.pct), now);
-      throw new GameError('Recompensa desconhecida');
-    });
+    const { kind, ...args } = checkArgs(rawArgs) as { kind?: string } & Record<string, unknown>;
+    const action = CLAIMS[kind as ClaimKind];
+    if (!action) throw new GameError('Recompensa desconhecida');
+    const { st, out } = await this.withState(userId, (s, now) => runAction(s.save, action, args as never, { now }));
     return { result: out, save: toClient(st.save) };
   }
 
@@ -188,8 +190,8 @@ export class GameServer {
 
   /** Começa uma batalha: o servidor sorteia a semente e guarda a fotografia do alvo. */
   async startBattle(userId: string, rawArgs: unknown) {
-    const a = checkArgs(rawArgs) as { kind?: BattleContext; targetKey?: string; revengeId?: string; event?: EventRules };
-    const kind: BattleContext = a.kind === 'revenge' ? 'revenge' : 'raid';
+    const a = checkArgs(rawArgs) as { kind?: BattleContext; targetKey?: string; revengeId?: string };
+    const kind: BattleContext = a.kind === 'revenge' ? 'revenge' : a.kind === 'event' ? 'event' : 'raid';
     // vingança contra jogador real: carrega a cidade atual dele
     let revengeCity: { city: BotCity; ownerId: string | null } | null = null;
     if (kind === 'revenge') {
@@ -205,7 +207,11 @@ export class GameServer {
     const { st } = await this.withState(userId, (s, now) => {
       let target: BotCity;
       let ownerId: string | null = null;
-      if (kind === 'revenge') {
+      let event: EventRules | undefined;
+      if (kind === 'event') {
+        target = eventTarget(s.save, now);
+        event = currentEvent(now).rules;
+      } else if (kind === 'revenge') {
         target = revengeCity!.city;
         ownerId = revengeCity!.ownerId;
       } else {
@@ -214,12 +220,12 @@ export class GameServer {
         target = t.city;
         ownerId = t.ownerId;
       }
-      const ab: ActiveBattle = { seed: metaRng(s.save).nextU32(), kind, target, targetKey: a.targetKey, ownerId, revengeId: a.revengeId, event: undefined, startedAt: now };
+      const ab: ActiveBattle = { seed: metaRng(s.save).nextU32(), kind, target, targetKey: a.targetKey, ownerId, revengeId: a.revengeId, event, startedAt: now };
       s.activeBattle = ab;
       return ab;
     });
     const ab = st.activeBattle!;
-    return { seed: ab.seed, target: ab.target, kind: ab.kind, save: toClient(st.save) };
+    return { seed: ab.seed, target: ab.target, kind: ab.kind, event: ab.event ?? null, save: toClient(st.save) };
   }
 
   /**
@@ -241,7 +247,8 @@ export class GameServer {
       }
       const setup = raidSetupFor(s.save, ab.target, ab.seed, ab.event);
       const { sim, result } = runBattle(setup, commands);
-      const rewards = applyBattleResult(s.save, { kind: ab.kind, target: ab.target, result, squad: [...s.save.squad], now, revengeId: ab.revengeId });
+      const squad = battleSquad(s.save, ab.event?.element).ids;
+      const rewards = applyBattleResult(s.save, { kind: ab.kind, target: ab.target, result, squad, now, revengeId: ab.revengeId });
       if (ab.kind === 'raid' && ab.targetKey) s.targets = s.targets.filter((x) => x.key !== ab.targetKey);
       if (s.save.progression.tutorialStep < 3) s.save.progression.tutorialStep++;
       s.activeBattle = null;

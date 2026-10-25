@@ -4,6 +4,7 @@ import type { Rng } from '../sim/rng.ts';
 import { grantCharacter } from './collection.ts';
 import { ECONOMY, addAccountXp, isUnlocked } from './economy.ts';
 import { grantChest } from './raids.ts';
+import { trackMission } from './missions.ts';
 import { metaRng } from './rng.ts';
 import type { ChestType, Rarity, SaveData } from './types.ts';
 
@@ -153,6 +154,7 @@ export function openChest(save: SaveData, uid: string, now: number): ChestResult
   }
   save.chests.openedTotal++;
   save.stats.chestsOpened++;
+  trackMission(save, 'open_chests', 1);
   save.pass.xp += ECONOMY.pass.xp.chest;
   const levelsGained = addAccountXp(save, ECONOMY.account.xp.chestOpen);
   return { ok: true, opening: { uid, type: item.type, cards, coins: roll.coins, diamonds: roll.diamonds, best: roll.best, levelsGained } };

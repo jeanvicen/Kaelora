@@ -1,7 +1,8 @@
 import type { App } from '../../app.ts';
 import { audio } from '../../core/audio.ts';
 import { CHEST_TYPES, chestDef, chestLockReason, chestOdds, chestPrice, countsForPity, pityRemaining } from '../../meta/chests.ts';
-import { formatNumber, unlockLevel } from '../../meta/economy.ts';
+import { formatDuration, formatNumber, unlockLevel } from '../../meta/economy.ts';
+import { freeChestStatus } from '../../meta/retention.ts';
 import { MAX_CHESTS } from '../../meta/raids.ts';
 import type { ChestItem, ChestType } from '../../meta/types.ts';
 import { h } from '../dom.ts';
@@ -18,6 +19,8 @@ export function openChests(app: App): void {
   const gemChip = h('div', { class: 'chip' }, icon('gem'), h('span', { class: 'stroke-sm' }));
   const coinChip = h('div', { class: 'chip' }, icon('coin'), h('span', { class: 'stroke-sm' }));
   const invTitle = h('div', { class: 'ch-title stroke-sm' });
+  const free = h('button', { class: 'ch-buy ch-free-btn' });
+  let freeTimer = 0;
 
   const render = () => {
     const save = app.save;
@@ -28,6 +31,7 @@ export function openChests(app: App): void {
     if (!selected && items.length) selected = { kind: 'inv', uid: items[0].uid };
     if (!selected) selected = { kind: 'shop', type: 'prata' };
     invTitle.textContent = `Seus baús (${items.length}/${MAX_CHESTS})`;
+    renderFree();
     const slots: HTMLElement[] = [];
     for (let i = 0; i < MAX_CHESTS; i++) {
       const it = items[i];
@@ -58,10 +62,11 @@ export function openChests(app: App): void {
     inv.replaceChildren(...slots);
 
     shop.replaceChildren(
-      h('div', { class: 'ch-title stroke-sm' }, 'Loja de baús'),
+      h('div', { class: 'ch-title stroke-sm' }, 'Baú grátis e loja'),
       h(
         'div',
         { class: 'ch-shop-row' },
+        free,
         ...CHEST_TYPES.filter((t) => chestPrice(t) !== null).map((t) => {
           const lock = chestLockReason(save, t);
           const sel = selected?.kind === 'shop' && selected.type === t;
@@ -144,6 +149,27 @@ export function openChests(app: App): void {
       ),
     );
   };
+
+  /** Baú grátis: primeiro item da fileira da loja (a cada 4 h, até 2 guardados). */
+  const renderFree = () => {
+    const st = freeChestStatus(app.save, Date.now());
+    free.className = `ch-buy ch-free-btn ${st.ready ? 'ready' : ''}`;
+    const kids: HTMLElement[] = [chestPic(app, 'madeira')];
+    if (st.ready) kids.push(h('span', { class: 'badge ch-free-badge' }, String(st.ready)));
+    kids.push(h('span', { class: `ch-price ${st.ready ? 'free-ready' : ''}` }, st.ready ? 'GRÁTIS!' : formatDuration(Math.round((st.nextAt - Date.now()) / 1000))));
+    free.replaceChildren(...kids);
+  };
+  free.addEventListener('click', async () => {
+    const st = freeChestStatus(app.save, Date.now());
+    if (!st.ready) return app.ui.toast(`Próximo baú grátis em ${formatDuration(Math.round((st.nextAt - Date.now()) / 1000))} (às vezes vem Prata ou Ouro!)`, 'info', 'clock');
+    const r = await app.claim('freeChest', {});
+    if (!r.ok) return app.ui.toast(r.reason, 'error');
+    audio.play('chestOpen');
+    app.ui.toast(r.type === 'madeira' ? 'Baú de Madeira grátis!' : `Sorte! Veio um ${r.type === 'ouro' ? 'Baú de Ouro' : 'Baú de Prata'}!`, 'gold', 'chest');
+    selected = { kind: 'inv', uid: r.uid };
+    render();
+  });
+  freeTimer = window.setInterval(() => document.body.contains(free) ? renderFree() : clearInterval(freeTimer), 1000);
 
   const open = (item: ChestItem) => {
     openChestScreen(app, item.uid, () => render());

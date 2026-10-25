@@ -4,6 +4,7 @@ import type { BattleResult } from '../sim/types.ts';
 import { coreLevel } from './buildings.ts';
 import { maxCharacterLevel } from './city.ts';
 import { ECONOMY, addAccountXp } from './economy.ts';
+import { trackMission } from './missions.ts';
 import { metaRng } from './rng.ts';
 import type { ChestType, SaveData } from './types.ts';
 
@@ -176,5 +177,16 @@ export function applyBattleResult(
   if (r.coreDestroyed) st.coresDestroyed++;
   st.buildingsDestroyed += r.structuresDestroyed;
   st.damageDealt += r.damageDealt[0];
+  // missões diárias e evento semanal (treino não conta)
+  if (!training) {
+    if (won) trackMission(save, 'win_battles', 1);
+    trackMission(save, 'earn_stars', stars);
+    trackMission(save, 'destroy_buildings', r.structuresDestroyed);
+    trackMission(save, 'use_abilities', r.abilitiesUsed[0]);
+    trackMission(save, 'use_ultimate', r.ultimatesUsed[0]);
+    trackMission(save, 'deal_damage', r.damageDealt[0]);
+    if (r.coreDestroyed) trackMission(save, 'destroy_cores', 1);
+  }
+  if (ctx.kind === 'event' && won) save.events.wins++;
   return rewards;
 }

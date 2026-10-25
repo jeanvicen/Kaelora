@@ -94,6 +94,22 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 - A parte online foi testada com o servidor em memória (Vitest) e com o bundle rodando no Deno; as Edge Functions passam no `deno check`. Ainda não foi exercitada contra um projeto Supabase real (precisa criar o projeto; passo a passo no README).
 - A importação do progresso do aparelho é limitada a valores plausíveis, mas um save local editado ainda pode ganhar alguma vantagem uma única vez.
 
-## Fase 6 — Retenção ⏳
+## Fase 6 — Retenção ✅
+
+**Feito**
+- Calendário do jogo num fuso fixo (Brasília) para cliente e servidor virarem o dia juntos (`src/meta/time.ts`); a virada de dia/semana/temporada roda em toda ação no servidor e no relógio do cliente offline.
+- **Missões diárias**: 3 por dia sorteadas do `economy.json` (metas crescem com o nível de conta), progresso contado nos lugares certos (batalha validada, baú aberto, coleta, melhoria; treino não conta), resgate com XP de conta e do passe e bônus por completar as 3.
+- **Baú grátis** a cada 4 h (até 2 guardados), às vezes vem Prata (15%) ou Ouro (3%) — sorteio do servidor online.
+- **Sequência de login de 7 dias** com prêmios crescentes (o dia 7 dá Baú de Ouro + diamantes); faltar um dia recomeça; calendário aparece sozinho na primeira entrada do dia.
+- **Ligas** Bronze → Extremo com recompensa semanal: toda segunda o jogador recebe o prêmio da liga alcançada e os troféus têm reset suave. Tela **Liga & Ranking** com a escada de ligas e o ranking (online: view `leaderboards`; offline: rivais da semana).
+- **Eventos semanais** (`data/events.json`): Núcleo Titã (Núcleo com o dobro de vida), Energia Turbo, Torres Furiosas, Blitz de 90 s e as Semanas de Elemento ("só personagens Volt" — os mais fortes do jogador entram e o evento empresta Comuns para completar). Marcos de 1/3/5 vitórias com prêmios; validado no servidor.
+- **Passe de temporada** (30 dias): trilha grátis e premium (450 diamantes), 30 níveis por XP do passe, **Extremo da temporada** no último nível premium, contador de dias.
+- **Menu "Mais"** com Evento, Passe, Liga & Ranking, Treinamento, Loja, Perfil, Vingança, Duelo e Configurações (bloqueios por nível de conta) e selos de "tem prêmio esperando".
+- **Notificações do PWA**: baú grátis pronto, melhoria concluída, escudo acabando, prêmio de login e evento novo (agendadas quando o app vai para segundo plano) e "cidade atacada" em tempo real (online).
+- Testes: calendário, missões, sequência de login, baú grátis, liga semanal, evento (inclusive esquadrão de elemento), passe e resgates/evento no servidor (82 testes no total).
+
+**Bugs conhecidos / observações**
+- As notificações agendadas dependem do sistema manter o app vivo em segundo plano; para avisar com o app fechado é preciso Web Push no servidor (próximo passo natural com o Supabase).
+
 ## Fase 7 — Conteúdo e polimento ⏳
 ## Fase 8 — Multiplayer ao vivo ⏳
