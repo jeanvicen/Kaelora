@@ -2,7 +2,7 @@ import type { App } from '../../app.ts';
 import { ELEMENTS } from '../../content/classes.ts';
 import { audio } from '../../core/audio.ts';
 import { vibrate } from '../../core/device.ts';
-import { albumMilestones, albumProgress, claimAlbum, type AlbumMilestone } from '../../meta/collection.ts';
+import { albumMilestones, albumProgress, type AlbumMilestone } from '../../meta/collection.ts';
 import { formatNumber, type Reward } from '../../meta/economy.ts';
 import type { Element } from '../../meta/types.ts';
 import { h } from '../dom.ts';
@@ -83,7 +83,7 @@ function milestoneNode(app: App, m: AlbumMilestone, at: number, root: HTMLElemen
           app.ui.toast(`${m.pct}%: junte ${m.needed} personagens. Prêmio: ${describe(m.reward)}`, 'info', 'book');
           return;
         }
-        const r = app.store.update('album-claim', (d) => claimAlbum(d, m.element, m.pct, Date.now()));
+        const r = app.act('albumClaim', { element: m.element, pct: m.pct });
         if (!r.ok) return app.ui.toast(r.reason, 'error');
         audio.play('coins');
         audio.play('star');

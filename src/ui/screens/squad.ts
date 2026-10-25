@@ -5,7 +5,7 @@ import { ELEMENT_SYNERGY_HP, activeSynergies, characterPower, squadPower } from 
 import type { CharacterDef } from '../../content/types.ts';
 import { audio } from '../../core/audio.ts';
 import { vibrate } from '../../core/device.ts';
-import { albumClaimableCount, albumProgress, canStarUp, setSquadSlot } from '../../meta/collection.ts';
+import { albumClaimableCount, albumProgress, canStarUp } from '../../meta/collection.ts';
 import { formatNumber } from '../../meta/economy.ts';
 import type { ClassId, Element, Rarity } from '../../meta/types.ts';
 import { h } from '../dom.ts';
@@ -245,7 +245,7 @@ export function openSquad(app: App, initial: Tab = 'squad'): void {
   };
   const pickInto = (id: number) => {
     const slot = pickSlot;
-    const r = app.store.update('squad', (d) => setSquadSlot(d, slot, id));
+    const r = app.act('squadSlot', { slot, id });
     if (!r.ok) return app.ui.toast(r.reason, 'error');
     pickSlot = -1;
     audio.play('deploy');

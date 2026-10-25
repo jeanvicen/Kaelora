@@ -1,0 +1,13 @@
+# Configuração do Supabase CLI para o Kaelora (desenvolvimento local).
+# Em produção, configure o mesmo no painel do projeto (veja o README).
+project_id = "kaelora"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:4173"]
+# jogar como convidado (conta anônima, pode virar e-mail depois)
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_signup = true

@@ -14,7 +14,7 @@ function row(ic: IconName | null, label: string, control: HTMLElement, hint?: st
 export function openSettings(app: App): void {
   const s = app.store.data.settings;
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => {
-    app.store.update('settings', (d) => (d.settings[k] = v));
+    app.act('settings', { patch: { [k]: v } as Partial<Settings> });
     app.applySettings();
   };
   const slider = (k: 'sound' | 'music') => {
@@ -183,8 +183,119 @@ export function openSettings(app: App): void {
       ),
       row('install', 'App', installBtn, isStandalone() ? 'Você já está no app instalado' : 'Instale para jogar em tela cheia e offline'),
       row('user', 'Conta', account, 'Jogador: ' + app.store.data.profile.name),
+      row('ranking', 'Jogo online', onlineBox(app), app.online ? 'Moedas, baús e batalhas são validados no servidor' : 'Invasões contra jogadores reais e progresso na nuvem'),
       h('div', { class: 'credits faint' }, 'Kaelora • Klipza Studio • Modelos, sons e músicas gerados por código'),
     ),
   );
   app.ui.modal(body, { onClose: off });
+}
+
+/** Conta online (Supabase): entrar como convidado, link mágico por e-mail, sair. */
+function onlineBox(app: App): HTMLElement {
+  const box = h('div', { class: 'row wrap-row' });
+  const cloud = app.cloud;
+  if (!cloud) {
+    box.appendChild(h('div', { class: 'chip' }, 'Offline (servidor não configurado)'));
+    return box;
+  }
+  if (app.online) {
+    const who = h('div', { class: 'chip' }, icon('check'), h('span', { class: 'stroke-sm' }, 'Online'));
+    void cloud.currentEmail().then((e) => ((who.lastChild as HTMLElement).textContent = e ? `Online: ${e}` : 'Online (convidado)'));
+    box.append(
+      who,
+      h(
+        'button',
+        {
+          class: 'btn blue small',
+          onClick: () =>
+            askEmail(app, 'Vincular e-mail', 'Use o mesmo progresso em qualquer aparelho.', async (email) => {
+              await cloud.linkEmail(email);
+              app.ui.toast('Confira seu e-mail para confirmar!', 'good');
+            }),
+        },
+        'Vincular e-mail',
+      ),
+      h(
+        'button',
+        {
+          class: 'btn dark small',
+          onClick: async () => {
+            if (!(await app.ui.confirm('Sair da conta?', 'O jogo volta para o modo offline neste aparelho.', 'Sair', 'Cancelar'))) return;
+            await cloud.signOut();
+            location.reload();
+          },
+        },
+        'Sair',
+      ),
+    );
+    return box;
+  }
+  box.append(
+    h(
+      'button',
+      {
+        class: 'btn green small',
+        onClick: async () => {
+          const ok = await app.ui.confirm('Jogar online?', 'Seu progresso deste aparelho vai para a nuvem (com limites de segurança). A partir daí o servidor é quem manda.', 'Entrar', 'Cancelar');
+          if (!ok) return;
+          try {
+            await cloud.signInGuest();
+            await app.store.flush(true);
+            location.reload();
+          } catch (e) {
+            app.ui.toast(e instanceof Error ? e.message : 'Erro ao entrar', 'error');
+          }
+        },
+      },
+      'Entrar como convidado',
+    ),
+    h(
+      'button',
+      {
+        class: 'btn blue small',
+        onClick: () =>
+          askEmail(app, 'Entrar com e-mail', 'Enviamos um link mágico: é só tocar nele para entrar (sem senha).', async (email) => {
+            await app.store.flush(true);
+            await cloud.sendMagicLink(email);
+            app.ui.toast('Link enviado! Abra seu e-mail neste aparelho.', 'good');
+          }),
+      },
+      'Entrar com e-mail',
+    ),
+  );
+  return box;
+}
+
+function askEmail(app: App, title: string, text: string, done: (email: string) => Promise<void>): void {
+  const input = h('input', { class: 'input', type: 'email', placeholder: 'seu@email.com', autocomplete: 'email' }) as HTMLInputElement;
+  const m = app.ui.modal(
+    h(
+      'div',
+      { class: 'panel confirm-box' },
+      h('div', { class: 'panel-head' }, h('div', { class: 'panel-title' }, title)),
+      h(
+        'div',
+        { class: 'panel-body col' },
+        h('p', { class: 'confirm-text' }, text),
+        input,
+        h(
+          'button',
+          {
+            class: 'btn green',
+            onClick: async () => {
+              const email = input.value.trim();
+              if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return app.ui.toast('E-mail inválido', 'error');
+              try {
+                await done(email);
+                m.close();
+              } catch (e) {
+                app.ui.toast(e instanceof Error ? e.message : 'Erro', 'error');
+              }
+            },
+          },
+          'Enviar',
+        ),
+      ),
+    ),
+  );
 }

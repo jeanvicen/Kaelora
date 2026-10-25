@@ -1,5 +1,6 @@
 import type { App } from '../../app.ts';
 import { albumClaimableCount } from '../../meta/collection.ts';
+import { activeRevenges, protection } from '../../meta/defense.ts';
 import { formatNumber, leagueFor, xpToNext } from '../../meta/economy.ts';
 import { evolvableCharacters, nextGoal } from '../../meta/goals.ts';
 import { h, tweenNumber } from '../dom.ts';
@@ -72,6 +73,7 @@ export class CityHud {
       this.editBtn,
       this.sideButton('build', 'Construir', () => app.openBuildShop()),
       this.sideButton('mission', 'Missões', () => app.openMissions(), 'missions'),
+      this.sideButton('shield', 'Defesas', () => app.openRevengeWall(), 'defense'),
     );
 
     const nav = h('nav', { class: 'bottom-nav' });
@@ -158,6 +160,12 @@ export class CityHud {
     const sq = evolvableCharacters(s).length + albumClaimableCount(s);
     this.squadBadge.textContent = String(sq);
     this.squadBadge.classList.toggle('hidden', sq === 0);
+    // defesas: alerta de ataque não visto / vingança aberta; rótulo com o escudo
+    const now = Date.now();
+    this.setAlert('defense', s.raids.log.some((e) => !e.seen) || activeRevenges(s, now).length > 0 || !!s.raids.pendingChoice);
+    const prot = protection(s, now);
+    const lbl = this.sideButtons.querySelector('[data-key="defense"] .side-label');
+    if (lbl) lbl.textContent = prot.kind ? `Escudo ${Math.max(1, Math.ceil((prot.until - now) / 3_600_000))}h` : 'Defesas';
     this.refreshGoal();
   }
 

@@ -1,6 +1,6 @@
 import type { App } from '../../app.ts';
 import { audio } from '../../core/audio.ts';
-import { CHEST_TYPES, buyChest, chestDef, chestLockReason, chestOdds, chestPrice, countsForPity, pityRemaining } from '../../meta/chests.ts';
+import { CHEST_TYPES, chestDef, chestLockReason, chestOdds, chestPrice, countsForPity, pityRemaining } from '../../meta/chests.ts';
 import { formatNumber, unlockLevel } from '../../meta/economy.ts';
 import { MAX_CHESTS } from '../../meta/raids.ts';
 import type { ChestItem, ChestType } from '../../meta/types.ts';
@@ -149,8 +149,8 @@ export function openChests(app: App): void {
     openChestScreen(app, item.uid, () => render());
   };
 
-  const buy = (type: ChestType) => {
-    const r = app.store.update('buy-chest', (d) => buyChest(d, type, Date.now()));
+  const buy = async (type: ChestType) => {
+    const r = await app.buyChestAction(type);
     if (!r.ok) {
       app.ui.toast(r.reason, 'error', 'gem');
       return;

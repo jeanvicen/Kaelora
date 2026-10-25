@@ -4,7 +4,7 @@ import { CLASS_INFO, ELEMENT_INFO } from '../../content/classes.ts';
 import { characterPower, displayStats, starMultiplier } from '../../content/squad.ts';
 import { audio } from '../../core/audio.ts';
 import { vibrate } from '../../core/device.ts';
-import { canStarUp, levelProgress, setSquadSlot, starUp, starUpCost } from '../../meta/collection.ts';
+import { canStarUp, levelProgress, starUpCost } from '../../meta/collection.ts';
 import { maxCharacterLevel } from '../../meta/city.ts';
 import { ECONOMY, formatNumber } from '../../meta/economy.ts';
 import { RARITY_COLORS } from '../../render/colors.ts';
@@ -217,7 +217,7 @@ export function openCharacter(app: App, id: number, opts: { list?: number[]; onC
   };
 
   const evolve = () => {
-    const r = app.store.update('star-up', (d) => starUp(d, current));
+    const r = app.act('starUp', { id: current });
     if (!r.ok) {
       app.ui.toast(r.reason, 'error');
       return;
@@ -255,7 +255,7 @@ export function openCharacter(app: App, id: number, opts: { list?: number[]; onC
               {
                 class: 'slot-pick',
                 onClick: () => {
-                  const r = app.store.update('squad', (dd) => setSquadSlot(dd, i, current));
+                  const r = app.act('squadSlot', { slot: i, id: current });
                   m.close();
                   if (!r.ok) return app.ui.toast(r.reason, 'error');
                   audio.play('deploy');

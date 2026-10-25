@@ -73,7 +73,7 @@ export const ACTIONS = {
     invasionTargets(s, c.now, true);
     return { ok: true as const };
   },
-  battleSeed: (s: SaveData) => metaRng(s).nextU32(),
+  battleSeed: (s: SaveData, _a: Record<string, never>) => metaRng(s).nextU32(),
   battleEnd: (
     s: SaveData,
     a: { kind: BattleContext; target: Pick<BotCity, 'loot' | 'coreLevel' | 'trophies' | 'seed'> | null; result: BattleResult; squad: number[]; revengeId?: string },
@@ -86,7 +86,7 @@ export const ACTIONS = {
   },
   // ---------------- defesa
   offlineRaids: (s: SaveData, _a: Record<string, never>, c: ActionCtx) => processOfflineRaids(s, c.now),
-  defenseSeen: (s: SaveData) => {
+  defenseSeen: (s: SaveData, _a: Record<string, never>) => {
     markDefenseSeen(s);
     return true;
   },
@@ -112,7 +112,6 @@ export const OPTIMISTIC: ReadonlySet<ActionName> = new Set<ActionName>([
   'move',
   'store',
   'upgrade',
-  'finishUpgrades',
   'speedup',
   'collect',
   'repair',
@@ -124,6 +123,7 @@ export const OPTIMISTIC: ReadonlySet<ActionName> = new Set<ActionName>([
   'settings',
   'defenseSeen',
 ]);
+// `finishUpgrades` não vai ao servidor: lá as melhorias terminam sozinhas a cada ação.
 
 /** Ações que o servidor aceita pela função genérica `game-action`. */
 export const CLIENT_ACTIONS: ReadonlySet<ActionName> = new Set<ActionName>([...OPTIMISTIC, 'buyChest', 'raidChoice']);

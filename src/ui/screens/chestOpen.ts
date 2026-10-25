@@ -3,7 +3,7 @@ import { getCharacter } from '../../content/catalog.ts';
 import { CLASS_INFO } from '../../content/classes.ts';
 import { audio } from '../../core/audio.ts';
 import { vibrate } from '../../core/device.ts';
-import { chestDef, openChest, type ChestOpening, type OpenedCard } from '../../meta/chests.ts';
+import { chestDef, type ChestOpening, type OpenedCard } from '../../meta/chests.ts';
 import { formatNumber } from '../../meta/economy.ts';
 import { RARITY_COLORS } from '../../render/colors.ts';
 import { ChestStage } from '../../scenes/chest/ChestStage.ts';
@@ -20,8 +20,14 @@ let stage: ChestStage | null = null;
  * Abertura de baú: o resultado é decidido ANTES da animação (pelo "servidor":
  * offline é a lógica local; online, a Edge Function). Depois é só show.
  */
-export function openChestScreen(app: App, uid: string, onDone?: () => void): void {
-  const r = app.store.update('open-chest', (d) => openChest(d, uid, Date.now()));
+export async function openChestScreen(app: App, uid: string, onDone?: () => void): Promise<void> {
+  let r;
+  try {
+    r = await app.openChestAction(uid);
+  } catch (e) {
+    app.ui.toast(e instanceof Error ? e.message : 'Erro no servidor', 'error');
+    return;
+  }
   if (!r.ok) {
     app.ui.toast(r.reason, 'error');
     return;
@@ -117,7 +123,7 @@ export function openChestScreen(app: App, uid: string, onDone?: () => void): voi
   };
 
   const finishSeen = () => {
-    if (!app.save.progression.seenChestIntro[opening.type]) app.store.update('chest-seen', (d) => (d.progression.seenChestIntro[opening.type] = true));
+    if (!app.save.progression.seenChestIntro[opening.type]) app.act('chestSeen', { type: opening.type });
   };
 
   const close = () => {

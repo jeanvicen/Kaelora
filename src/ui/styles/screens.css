@@ -701,3 +701,236 @@
   align-items: center;
   margin-top: 6px;
 }
+.targets.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.tc-real {
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--pink);
+  font-size: 9px;
+  vertical-align: middle;
+  -webkit-text-stroke: 0;
+}
+
+/* ---------- defesa, saque e vingança ---------- */
+.def-report {
+  width: min(560px, calc(100vw - 30px));
+}
+.def-report .panel-head .icon {
+  width: 26px;
+  height: 26px;
+}
+.def-report.fell .panel-head {
+  background: linear-gradient(90deg, rgba(255, 79, 94, 0.35), transparent);
+}
+.def-report.held .panel-head {
+  background: linear-gradient(90deg, rgba(91, 255, 138, 0.25), transparent);
+}
+.def-report .panel-body {
+  gap: 6px;
+  max-height: 62vh;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+.def-row,
+.rev-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+.def-row.fell {
+  border-color: rgba(255, 79, 94, 0.45);
+}
+.def-row.held {
+  border-color: rgba(91, 255, 138, 0.35);
+}
+.def-badge {
+  flex: none;
+  width: 92px;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+}
+.def-row.fell .def-badge {
+  background: var(--red);
+}
+.def-row.held .def-badge {
+  background: var(--green-d);
+}
+.def-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12.5px;
+}
+.def-info b {
+  font-size: 15px;
+}
+.def-loss {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #ff9aa4;
+  font-weight: 700;
+}
+.def-loss .icon {
+  width: 15px;
+  height: 15px;
+}
+.def-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.raid-choice {
+  position: relative;
+  width: min(640px, calc(100vw - 30px));
+  padding: 16px 18px 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border-color: #3a0712;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 79, 94, 0.45), transparent 60%),
+    linear-gradient(180deg, #3a1048, #160a2a);
+}
+.rc-alarm {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 40, 60, 0.5), transparent 55%);
+  animation: co-blink 0.9s ease-in-out infinite;
+  pointer-events: none;
+}
+.raid-title {
+  position: relative;
+  font-size: 30px;
+  font-weight: 700;
+  color: #ff6a78;
+  letter-spacing: 1px;
+}
+.raid-sub {
+  position: relative;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.raid-safe {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green);
+  font-weight: 700;
+}
+.raid-options {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+.raid-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 12px 14px;
+  border-radius: 16px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.4);
+  text-align: center;
+  font-size: 12.5px;
+  transition: transform var(--t-fast) var(--ease-out);
+}
+.raid-opt:active {
+  transform: scale(0.96);
+}
+.raid-opt .icon {
+  width: 34px;
+  height: 34px;
+}
+.raid-opt b {
+  font-size: 19px;
+}
+.raid-opt.retake {
+  background: linear-gradient(180deg, #ff6a78, #c22a44);
+}
+.raid-opt.rebuild {
+  background: linear-gradient(180deg, #5a46c8, #2e2470);
+}
+.raid-shield {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+}
+.revenge-screen {
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255, 79, 94, 0.22), transparent 45%),
+    linear-gradient(180deg, #2a1048, #0e0c38);
+}
+.shield-chip .icon {
+  width: 22px;
+  height: 22px;
+}
+.shield-chip.off {
+  opacity: 0.7;
+}
+.rev-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  padding: 0 calc(12px + var(--safe-r)) calc(10px + var(--safe-b)) calc(12px + var(--safe-l));
+}
+.rev-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rev-col .panel-head .icon {
+  width: 22px;
+  height: 22px;
+}
+.rev-col .panel-body {
+  flex: 1;
+  min-height: 0;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+.rev-row.open {
+  border-color: rgba(255, 79, 94, 0.5);
+}
+.rev-row.done,
+.rev-row.expired {
+  opacity: 0.6;
+}
+.rev-skull .icon {
+  width: 26px;
+  height: 26px;
+}
+.rev-empty,
+.rev-tip {
+  margin: 4px 0;
+  font-size: 12.5px;
+  text-align: center;
+}

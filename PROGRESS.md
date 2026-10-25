@@ -77,7 +77,23 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 - **Nível de conta**: comemoração com o que foi liberado e o prêmio (moedas + diamantes), mostrada quando a cidade fica livre.
 - Testes: tabela de chances, reprodutibilidade, distribuição real (60 mil cartas), ordem das cartas, garantia (nunca passa de 40 baús), abertura e compra (58 testes no total).
 
-## Fase 5 — Online ⏳
+## Fase 5 — Online ✅
+
+**Feito**
+- **Registro único de ações** (`src/meta/actions.ts`): toda mudança no save (cidade, coleção, baús, batalha, defesa) é uma função pura registrada. O cliente offline executa direto; online, aplica as determinísticas na hora (otimista) e o servidor repete e confirma; sorteios (baús, alvos, semente da batalha) esperam o servidor.
+- **Servidor autoritativo** (`src/server/`, independente de banco): matchmaking (jogadores reais com troféus parecidos e sem proteção + rivais-bot), início de batalha com semente secreta, **validação por re-simulação** (`src/sim` determinística — o resultado do servidor é o oficial), saque aplicado na cidade do defensor com controle de versão otimista, importação do progresso do aparelho com limites anti-trapaça, a semente do RNG nunca vai para o cliente.
+- **Supabase**: migração com todas as tabelas da especificação (`profiles`, `cities`, `owned_characters`, `squads`, `battles`, `chests`, `raid_status`, `missions`, `events`, `season_pass`, `leaderboards` + `player_state` canônico) e RLS (cliente só lê o que é dele; escrita só pelo servidor); função SQL de matchmaking; tempo real em `raid_status`.
+- **Edge Functions** (Deno): `bootstrap`, `game-action`, `open-chest`, `matchmaking`, `validate-battle`, `apply-raid`, `claim-reward`. Todas usam o mesmo código do jogo empacotado em `supabase/functions/_shared/kaelora-server.js` (`npm run build:server`).
+- **Cliente online** (`src/net/cloud.ts`, só carregado com `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`): convidado anônimo, link mágico por e-mail, vincular e-mail, sair, aviso em tempo real quando a cidade é atacada.
+- **Saque e defesa** (`src/meta/defense.ts`): Núcleo derrubado = cidade SAQUEADA (perde as moedas fora do Cofre, construções derrubadas viram ruína, coleção nunca é perdida), **escudo de 12 h**, **proteção de iniciante** (72 h ou até o nível 5, o que vier antes), escolha **Reconstruir do zero** (cidade nova + Pacote de Recomeço) ou **Retomar** (48 h para revidar e recuperar tudo + 30%).
+- Rivais-bot também invadem a cidade enquanto o jogador está fora (offline e online), com força calibrada por simulação (~50% de chance de saque numa cidade típica; tabela em `economy.json`).
+- Telas: relatório "Sua cidade foi invadida!", escolha da cidade saqueada, **Mural da Vingança** (revidar, prazo, registro de defesas com **replay do ataque** visto do lado da defesa), botão "Defesas" na HUD com alerta e tempo de escudo, selo "JOGADOR" nos alvos reais do Mapa de Invasão, seção "Jogo online" nas Configurações.
+- Testes: servidor (bootstrap, ações, baú, matchmaking, PvP completo com saque no defensor e vingança, hash falso, importação, concorrência) e defesa (proteção, saque, Cofre, reconstrução, replay, ataques offline) — 72 testes no total.
+
+**Bugs conhecidos / observações**
+- A parte online foi testada com o servidor em memória (Vitest) e com o bundle rodando no Deno; as Edge Functions passam no `deno check`. Ainda não foi exercitada contra um projeto Supabase real (precisa criar o projeto; passo a passo no README).
+- A importação do progresso do aparelho é limitada a valores plausíveis, mas um save local editado ainda pode ganhar alguma vantagem uma única vez.
+
 ## Fase 6 — Retenção ⏳
 ## Fase 7 — Conteúdo e polimento ⏳
 ## Fase 8 — Multiplayer ao vivo ⏳

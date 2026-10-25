@@ -13,13 +13,14 @@
     "test:watch": "vitest",
     "icons": "node scripts/generate-icons.mjs",
     "characters": "node scripts/export-characters.mjs",
-    "supabase:sync": "node scripts/sync-shared.mjs"
+    "build:server": "vite build --config vite.server.config.ts"
   },
   "engines": {
     "node": ">=20.19.0"
   },
   "dependencies": {
     "@fontsource-variable/fredoka": "^5.3.0",
+    "@supabase/supabase-js": "2.117.3",
     "three": "^0.186.1"
   },
   "devDependencies": {

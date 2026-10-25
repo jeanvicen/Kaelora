@@ -5,6 +5,7 @@ import { ELEMENTS } from '../content/classes.ts';
 import { squadPower } from '../content/squad.ts';
 import { CLIENT_ACTIONS, runAction, type ActionArgs, type ActionName } from '../meta/actions.ts';
 import { BUILDINGS, canPlace, coreLevel, maxLevel } from '../meta/buildings.ts';
+import { finishUpgrades } from '../meta/city.ts';
 import { claimAlbum } from '../meta/collection.ts';
 import { openChest } from '../meta/chests.ts';
 import { applyRaidOnPlayer, canBeRaided, coinsAtRisk, processOfflineRaids, replayCommands } from '../meta/defense.ts';
@@ -23,6 +24,7 @@ const HOUR = 3_600_000;
 const TARGETS_TTL = 6 * HOUR;
 const BATTLE_MAX_AGE = 20 * 60_000;
 const STATE_VERSION = 1;
+const CLOCK_SKEW = 5000;
 const CHEST_TYPES = new Set(['madeira', 'prata', 'ouro', 'magico', 'extremo']);
 
 /** Cópia do save para o cliente: sem a semente secreta do RNG. */
@@ -67,6 +69,8 @@ export class GameServer {
       if (!st) throw new GameError('Jogador não encontrado', 404);
       const prev = st.version;
       const now = this.clock();
+      // melhorias que já acabaram terminam aqui (tolerância de relógio do aparelho)
+      finishUpgrades(st.save, now + CLOCK_SKEW);
       const out = fn(st, now);
       st.version = prev + 1;
       try {

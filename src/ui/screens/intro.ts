@@ -97,7 +97,7 @@ export function showLogin(parent: HTMLElement, opts: { cloud: boolean }): Promis
             'div',
             { class: 'col login-right' },
             h('button', { class: 'btn green big', onClick: () => go(false) }, icon('play'), 'Jogar'),
-            opts.cloud ? h('button', { class: 'btn blue', onClick: () => go(true) }, 'Entrar com e-mail') : h('div', { class: 'faint login-note' }, 'Seu progresso fica salvo neste aparelho.'),
+            opts.cloud ? h('button', { class: 'btn blue', onClick: () => go(true) }, icon('ranking'), 'Jogar online') : h('div', { class: 'faint login-note' }, 'Seu progresso fica salvo neste aparelho.'),
           ),
         ),
       ),
