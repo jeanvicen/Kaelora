@@ -1,0 +1,278 @@
+/* ============================================================
+   Telas: splash, login, configurações, telas cheias genéricas
+   ============================================================ */
+.screen {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  transition:
+    opacity var(--t-med) var(--ease-out),
+    transform var(--t-med) var(--ease-out);
+}
+.screen-enter {
+  opacity: 0;
+  transform: scale(1.03);
+}
+.screen-leave {
+  opacity: 0 !important;
+  transform: scale(0.98);
+  transition-duration: 200ms;
+}
+
+/* ---------- splash ---------- */
+.splash,
+.login {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 63, 180, 0.35), transparent 45%),
+    radial-gradient(circle at 50% 120%, rgba(63, 246, 255, 0.35), transparent 55%),
+    linear-gradient(180deg, #2a1670, #0a1030);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+}
+.splash-rays {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 1600px;
+  height: 1600px;
+  margin: -800px 0 0 -800px;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.07) 0 8deg, transparent 8deg 20deg);
+  animation: rays-spin 30s linear infinite;
+  pointer-events: none;
+}
+@keyframes rays-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.splash-emblem {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  animation:
+    emblem-in 700ms var(--ease-pop) both,
+    emblem-float 3s ease-in-out 700ms infinite;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.3)) drop-shadow(0 0 30px rgba(63, 246, 255, 0.5));
+}
+@keyframes emblem-in {
+  from {
+    transform: scale(0.2) rotate(-30deg);
+    opacity: 0;
+  }
+}
+@keyframes emblem-float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.logo {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+}
+.logo-letter {
+  display: inline-block;
+  background: linear-gradient(180deg, #fff6c0 0%, #ffd23f 40%, #ff3fb4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0;
+  filter: drop-shadow(0 4px 0 var(--ink)) drop-shadow(3px 0 0 var(--ink)) drop-shadow(-3px 0 0 var(--ink)) drop-shadow(0 -3px 0 var(--ink));
+  animation: letter-in 520ms var(--ease-pop) both;
+}
+@keyframes letter-in {
+  from {
+    transform: translateY(-60px) scale(0.4);
+    opacity: 0;
+  }
+}
+.splash-sub {
+  position: relative;
+  letter-spacing: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(63, 246, 255, 0.8);
+}
+.splash-bar {
+  position: relative;
+  width: 240px;
+  margin-top: 10px;
+}
+.splash-tip {
+  position: relative;
+  font-size: 13px;
+  font-weight: 600;
+}
+.splash-out {
+  animation: splash-out 420ms ease-in forwards;
+}
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+/* ---------- login ---------- */
+.login-card {
+  position: relative;
+  width: min(720px, calc(100vw - 24px));
+  animation: pop-in 320ms var(--ease-pop);
+}
+.login-body {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+.login-left {
+  flex: 1.6;
+}
+.login-right {
+  flex: 1;
+  justify-content: center;
+  align-items: stretch;
+}
+.login-left label {
+  font-weight: 600;
+  font-size: 13px;
+}
+.login-blurb {
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 18px;
+}
+.login-note {
+  font-size: 12px;
+  text-align: center;
+}
+.element-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.element-pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.5);
+  border: 2.5px solid var(--ink);
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform var(--t-fast) var(--ease-out);
+}
+.element-pick:active {
+  transform: scale(0.94);
+}
+.element-pick.active {
+  background: color-mix(in srgb, var(--elc) 35%, #1a1248);
+  box-shadow:
+    0 0 0 2px var(--elc),
+    0 0 14px var(--elc);
+}
+.el-gem {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  background: var(--elc);
+  clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%);
+  filter: drop-shadow(0 0 4px var(--elc));
+}
+.element-modal {
+  width: min(520px, calc(100vw - 30px));
+}
+
+/* ---------- confirmação ---------- */
+.confirm-box {
+  width: min(420px, calc(100vw - 30px));
+}
+.confirm-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.confirm-actions {
+  justify-content: flex-end;
+}
+
+/* ---------- configurações ---------- */
+.settings {
+  width: min(620px, calc(100vw - 24px));
+  max-height: calc(100vh - 20px);
+}
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: calc(100vh - 90px);
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: rgba(10, 6, 40, 0.35);
+}
+.set-row > .icon {
+  width: 24px;
+  height: 24px;
+}
+.set-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 15px;
+}
+.set-label small {
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.set-row .slider {
+  width: 180px;
+}
+.set-row .segmented {
+  width: 230px;
+}
+.wrap-row {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 330px;
+}
+.save-code {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  border: 3px solid var(--ink);
+  padding: 8px;
+  font-family: monospace;
+  font-size: 11px;
+  resize: none;
+}
+.credits {
+  text-align: center;
+  font-size: 12px;
+  padding: 8px;
+}
+
+/* ---------- erro fatal ---------- */
+.fatal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  max-width: 420px;
+  pointer-events: auto;
+}

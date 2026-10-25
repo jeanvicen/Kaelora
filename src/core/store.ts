@@ -47,12 +47,13 @@ export class Store extends Emitter<StoreEvents> {
     this.timer = setTimeout(() => void this.flush(), 600);
   }
 
-  async flush(): Promise<void> {
+  /** Grava agora. `force` grava mesmo sem mudanças pendentes (save novo). */
+  async flush(force = false): Promise<void> {
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
     }
-    if (!this.dirty) return;
+    if (!this.dirty && !force) return;
     this.dirty = false;
     await writeSave(this.data);
     this.emit('saved', { at: Date.now() });

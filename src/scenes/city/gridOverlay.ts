@@ -67,11 +67,12 @@ export class GridOverlay {
       `,
       transparent: true,
       depthWrite: false,
+      depthTest: false,
     });
     this.foot = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), this.footMat);
     this.foot.rotation.x = -Math.PI / 2;
     this.foot.position.y = 0.02;
-    this.foot.renderOrder = 3;
+    this.foot.renderOrder = 50;
     this.foot.visible = false;
     this.group.add(this.foot);
 

@@ -123,9 +123,9 @@ function coreModel(level: number, element: Element): BuildingModel {
   const cp = new Palette();
   const size = t === 1 ? 7 : t === 2 ? 8 : 9;
   const cg = new VoxelGrid(size * 2 + 1, size * 3, size * 2 + 1);
-  const hi = cp.add(el.light, { glow: 1 });
-  const mid = cp.add(el.glow, { glow: 1 });
-  const lo = cp.add(el.main, { glow: 0.85 });
+  const hi = cp.add(el.glow, { glow: 0.9 });
+  const mid = cp.add(el.main, { glow: 0.85 });
+  const lo = cp.add(el.dark, { glow: 0.7 });
   const core = cp.add(0xffffff, { glow: 1 });
   const H = size * 3;
   const peak = Math.round(H * 0.38);

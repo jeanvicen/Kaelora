@@ -73,7 +73,7 @@ export class CityLife {
     this.group.add(this.cars.group);
 
     const birdCount = Math.round(4 + 5 * density);
-    this.birds = new InstancedVoxel(propGeometry('bird', birdModel, 1 / 16), birdCount);
+    this.birds = new InstancedVoxel(propGeometry('bird', birdModel, 1 / 26), birdCount);
     for (let i = 0; i < birdCount; i++) this.birdData.push({ phase: Math.random() * 6, off: new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 1.2, (Math.random() - 0.5) * 3) });
     this.group.add(this.birds.group);
 
@@ -203,7 +203,7 @@ export class CityLife {
     // bando de pássaros
     const bx = this.center.x + Math.cos(time * 0.13) * this.size * 0.45;
     const bz = this.center.y + Math.sin(time * 0.21) * this.size * 0.35;
-    const by = 8 + Math.sin(time * 0.3) * 1.5;
+    const by = 5.5 + Math.sin(time * 0.3) * 1.2;
     const heading = Math.atan2(Math.cos(time * 0.21) * 0.21 * this.size * 0.35, -Math.sin(time * 0.13) * 0.13 * this.size * 0.45);
     this.birdData.forEach((b, i) => {
       const flap = Math.sin(time * 9 + b.phase);
@@ -215,6 +215,7 @@ export class CityLife {
       this.birds.setMatrixAt(i, this.m);
     });
     this.birds.commit();
+    this.birds.group.visible = night < 0.6;
 
     // barcos
     this.boatData.forEach((b, i) => {

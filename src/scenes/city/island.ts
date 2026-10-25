@@ -37,7 +37,7 @@ export function buildIsland(size: number): IslandInfo {
   const rock = p.add(C.rock);
   const rockDark = p.add(C.rockDark);
   const road = p.add(0x3a3f5c);
-  const roadLine = p.add(C.neonCyan, { glow: 1 });
+  const roadLine = p.add(C.neonCyan, { glow: 0.55 });
   const roadEdge = p.add(C.neonPink, { glow: 0.8 });
   const neonCurb = p.add(C.neonCyan, { night: 1 });
 

@@ -1,4 +1,245 @@
-html, body { margin: 0; height: 100%; overflow: hidden; background: #0a1030; }
-#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-#ui { position: fixed; inset: 0; pointer-events: none; }
-#rotate-overlay { display: none; }
+/* ============================================================
+   Kaelora — tokens e base
+   ============================================================ */
+:root {
+  --ink: #14122b;
+  --ink-2: #0b0b16;
+  --panel: #241a5c;
+  --panel-2: #1a1248;
+  --panel-3: #120c36;
+  --panel-hi: #3a2c86;
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #ffffff;
+  --text-dim: #c3bde8;
+  --text-faint: #8f88c0;
+  --cyan: #3ff6ff;
+  --pink: #ff3fb4;
+  --yellow: #ffd23f;
+  --orange: #ff9f1a;
+  --green: #5bff8a;
+  --green-d: #1fae4f;
+  --red: #ff4f5e;
+  --blue: #3b8bff;
+  --purple: #a64dff;
+  --gold: #ffc93c;
+
+  --r-comum: #9aa3ad;
+  --r-raro: #3b8bff;
+  --r-epico: #a64dff;
+  --r-lendario: #ffc93c;
+  --r-extremo: #ff2a4a;
+
+  --el-solar: #ffaa2e;
+  --el-raiz: #3fd46a;
+  --el-mare: #2fb8ff;
+  --el-volt: #f2e23a;
+  --el-cristal: #ff7ae0;
+  --el-sombra: #7a4dff;
+
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+
+  --font: 'Fredoka Variable', 'Fredoka', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 140ms;
+  --t-med: 240ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0a1030;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  outline: none;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+#ui > * {
+  pointer-events: none;
+}
+#ui button,
+#ui input,
+#ui .interactive,
+#ui .panel,
+#ui .modal,
+#ui .sheet,
+#ui .screen {
+  pointer-events: auto;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+input {
+  font-family: inherit;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.icon {
+  display: inline-flex;
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+.icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* Texto com contorno escuro, estilo de jogo */
+.stroke {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px var(--ink);
+  text-shadow: 0 2px 0 var(--ink);
+}
+.stroke-sm {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 3px var(--ink);
+  text-shadow: 0 1.5px 0 var(--ink);
+}
+
+/* Trava em paisagem: no retrato, pede para girar */
+#rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: radial-gradient(circle at 50% 40%, #3a1f8f, #0a1030 70%);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 20px;
+  font-weight: 600;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+  text-align: center;
+}
+#rotate-overlay .rotate-phone {
+  width: 56px;
+  height: 96px;
+  border: 5px solid var(--cyan);
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(63, 246, 255, 0.6);
+  animation: rotate-hint 2s var(--ease-out) infinite;
+}
+@keyframes rotate-hint {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+@media (orientation: portrait) and (max-width: 900px) {
+  body.game-ready #rotate-overlay {
+    display: flex;
+  }
+}
+
+/* Utilitários */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.grow {
+  flex: 1;
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dim {
+  color: var(--text-dim);
+}
+.faint {
+  color: var(--text-faint);
+}
+.hidden {
+  display: none !important;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar,
+.scroll-y::-webkit-scrollbar {
+  display: none;
+}
+.scroll-y {
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

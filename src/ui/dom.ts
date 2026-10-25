@@ -15,7 +15,11 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Attrs | 
       if (k === 'class') el.className = String(v);
       else if (k === 'style') {
         if (typeof v === 'string') el.setAttribute('style', v);
-        else Object.assign(el.style, v);
+        else
+          for (const [sk, sv] of Object.entries(v as Record<string, string>)) {
+            if (sk.startsWith('--')) el.style.setProperty(sk, sv);
+            else (el.style as unknown as Record<string, string>)[sk] = sv;
+          }
       } else if (k.startsWith('on') && typeof v === 'function') {
         el.addEventListener(k.slice(2).toLowerCase(), v as EventListener);
       } else if (k === 'html') {
