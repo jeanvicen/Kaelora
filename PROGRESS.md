@@ -65,7 +65,18 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 - Cache LRU das geometrias voxel dos personagens (libera memória ao folhear a coleção).
 - Testes: coleção, fragmentos, estrelas, esquadrão, limite do Quartel, álbum e objetivo (50 testes no total).
 
-## Fase 4 — Baús e Economia ⏳
+## Fase 4 — Baús e Economia ✅
+
+**Feito**
+- `data/chests.json`: os 5 baús (Madeira, Prata, Ouro, Mágico, Extremo) com a tabela de chances exata da especificação, cartas por baú, moedas e diamantes, garantia e bloqueio por nível de conta.
+- Lógica em `src/meta/chests.ts` (pura e determinística pelo RNG do save, a mesma que a Edge Function `open-chest` vai rodar na Fase 5): sorteio por carta em pontos-base (4,5% = 450/10000), garantia de Lendário a cada 40 baús de Ouro+ sem Lendário e de Extremo a cada 150, melhor carta sempre por último (suspense), duplicatas viram fragmentos.
+- Tela de **Baús**: inventário (até 8), loja de baús com diamantes (Ouro/Mágico/Extremo liberam por nível de conta), **chances por personagem sempre visíveis antes de abrir** e contador da garantia.
+- **Abertura em 3D** (`src/scenes/chest/ChestStage.ts`): modelos voxel dos 5 baús com tampa articulada, queda com quique, tremedeira crescente com som e vibração, fresta brilhando na cor da melhor raridade, raios de luz, tampa explodindo em cubos e brilhos, coluna de luz e fonte de partículas. Lendário/Extremo: tremedeira mais longa em câmera lenta, clarão, comemoração e som especial.
+- Cada personagem pula de dentro do baú e pousa ao lado dele; a **carta gira e revela** (1,5 volta; 3,5 voltas no Lendário/Extremo) com raridade, elemento, classe e "NOVO!"/"+fragmentos" e selo de garantia. Toque para pular depois da primeira vez de cada tipo; resumo final com moedas e diamantes.
+- Botão "Abrir" direto na tela de resultado da batalha.
+- **Nível de conta**: comemoração com o que foi liberado e o prêmio (moedas + diamantes), mostrada quando a cidade fica livre.
+- Testes: tabela de chances, reprodutibilidade, distribuição real (60 mil cartas), ordem das cartas, garantia (nunca passa de 40 baús), abertura e compra (58 testes no total).
+
 ## Fase 5 — Online ⏳
 ## Fase 6 — Retenção ⏳
 ## Fase 7 — Conteúdo e polimento ⏳

@@ -207,9 +207,7 @@ export class Showroom {
   }
 
   private applyLighting(): void {
-    applyTimeOfDay(0.47, { near: 200, far: 400 });
-    lightUniforms.uSunDir.value.set(0.35, 0.75, 0.75).normalize();
-    lightUniforms.uNight.value = 0;
+    applyStageLighting();
   }
 
   /** Enquadra o conteúdo dentro de `frame()` usando view offset da câmera. */
@@ -254,7 +252,14 @@ export class Showroom {
 }
 
 const tmpV = new THREE.Vector3();
-const PODIUM_TOP = 0.3;
+
+/** Luz de estúdio (meio-dia, sem neblina) usada nas vitrines e nos baús. */
+export function applyStageLighting(): void {
+  applyTimeOfDay(0.47, { near: 200, far: 400 });
+  lightUniforms.uSunDir.value.set(0.35, 0.75, 0.75).normalize();
+  lightUniforms.uNight.value = 0;
+}
+export const PODIUM_TOP = 0.3;
 const RANK: Record<Rarity, number> = { comum: 0, raro: 1, epico: 2, lendario: 3, extremo: 4 };
 const EXTREME_COLS = [new THREE.Color(0xff2a4a), new THREE.Color(0xff2ad4), new THREE.Color(0xff8a1a)];
 
@@ -279,7 +284,7 @@ function applySilhouette(root: THREE.Object3D, mat: THREE.Material): void {
 const podiumCache = new Map<string, THREE.BufferGeometry>();
 
 /** Pódio voxel redondo: base metálica, aro néon na cor da raridade e tampo claro. */
-function podiumGeometry(rarity: Rarity | null): THREE.BufferGeometry {
+export function podiumGeometry(rarity: Rarity | null): THREE.BufferGeometry {
   const key = rarity ?? 'none';
   const hit = podiumCache.get(key);
   if (hit) return hit;
@@ -312,7 +317,7 @@ function podiumGeometry(rarity: Rarity | null): THREE.BufferGeometry {
 }
 
 let raysTex: THREE.CanvasTexture | null = null;
-function raysTexture(): THREE.CanvasTexture {
+export function raysTexture(): THREE.CanvasTexture {
   if (raysTex) return raysTex;
   const size = 256;
   const cv = document.createElement('canvas');
@@ -339,7 +344,7 @@ function raysTexture(): THREE.CanvasTexture {
   return raysTex;
 }
 
-function backgroundTexture(): THREE.CanvasTexture {
+export function backgroundTexture(): THREE.CanvasTexture {
   const cv = document.createElement('canvas');
   cv.width = 8;
   cv.height = 256;

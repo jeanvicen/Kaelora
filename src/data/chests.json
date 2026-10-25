@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "rarities": ["comum", "raro", "epico", "lendario", "extremo"],
+  "chests": {
+    "madeira": {
+      "name": "Baú de Madeira",
+      "cards": 3,
+      "coins": [60, 120],
+      "diamonds": [0, 0],
+      "odds": [85, 14, 1, 0, 0],
+      "shakeSec": 1.2
+    },
+    "prata": {
+      "name": "Baú de Prata",
+      "cards": 4,
+      "coins": [160, 300],
+      "diamonds": [0, 2],
+      "odds": [60, 32, 7, 1, 0],
+      "shakeSec": 1.4
+    },
+    "ouro": {
+      "name": "Baú de Ouro",
+      "cards": 6,
+      "coins": [420, 800],
+      "diamonds": [2, 6],
+      "odds": [35, 40, 20, 4.5, 0.5],
+      "shakeSec": 1.6
+    },
+    "magico": {
+      "name": "Baú Mágico",
+      "cards": 8,
+      "coins": [900, 1600],
+      "diamonds": [5, 12],
+      "odds": [0, 45, 40, 13, 2],
+      "shakeSec": 1.8
+    },
+    "extremo": {
+      "name": "Baú Extremo",
+      "cards": 10,
+      "coins": [2000, 3600],
+      "diamonds": [15, 30],
+      "odds": [0, 0, 50, 40, 10],
+      "shakeSec": 2.1
+    }
+  },
+  "coinsPerAccountLevel": 0.05,
+  "pity": {
+    "legendaryEvery": 40,
+    "extremeEvery": 150,
+    "countsFrom": ["ouro", "magico", "extremo"]
+  },
+  "unlockFeature": {
+    "ouro": "bau-ouro",
+    "magico": "bau-magico",
+    "extremo": "bau-extremo"
+  }
+}

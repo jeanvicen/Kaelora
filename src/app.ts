@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { registerSW } from 'virtual:pwa-register';
 import { audio } from './core/audio.ts';
 import { enterFullscreenLandscape, setVibration, vibrate } from './core/device.ts';
-import { Game } from './core/game.ts';
+import { Game, type GameOverlay } from './core/game.ts';
 import { loadSave } from './core/save.ts';
 import { Store } from './core/store.ts';
 import { BUILDINGS, levelStats } from './meta/buildings.ts';
@@ -20,7 +20,7 @@ import {
 import { formatNumber } from './meta/economy.ts';
 import { nextGoal } from './meta/goals.ts';
 import { migrateSave, newGame } from './meta/newGame.ts';
-import type { BuildingType, Element, SaveData } from './meta/types.ts';
+import type { BuildingType, ChestType, Element, SaveData } from './meta/types.ts';
 import { ELEMENT_COLORS } from './render/colors.ts';
 import { createBuildingView } from './render/models/factory.ts';
 import { detectPreset, presetConfig } from './render/renderer.ts';
@@ -39,6 +39,9 @@ import { decodeReplay, encodeReplay, type Replay } from './sim/replay.ts';
 import type { BattleResult } from './sim/types.ts';
 import { openInvasionMap } from './ui/screens/invasion.ts';
 import { openSquad } from './ui/screens/squad.ts';
+import { openChests } from './ui/screens/chests.ts';
+import { showLevelUp } from './ui/screens/levelUp.ts';
+import { createChestView } from './render/models/chest.ts';
 import { Showroom } from './render/showroom.ts';
 import { showResult } from './ui/screens/result.ts';
 import { h } from './ui/dom.ts';
@@ -67,7 +70,7 @@ export class App {
   battle!: BattleScene;
   /** Vitrine 3D compartilhada pelas telas de personagens (e baús). */
   readonly showroom = new Showroom();
-  private showroomStack: { frame: () => DOMRect | null; setup: (s: Showroom) => void }[] = [];
+  private overlayStack: ({ kind: 'showroom'; frame: () => DOMRect | null; setup: (s: Showroom) => void } | { kind: 'custom'; overlay: GameOverlay })[] = [];
   private battleCtx: { target: BotCity | null; kind: BattleKind; squad: number[]; revengeId?: string } | null = null;
 
   constructor(
@@ -191,9 +194,23 @@ export class App {
     this.ui.setHud(wrap);
   }
 
+  private pendingLevelUps: number[] = [];
+
+  /** Níveis de conta ganhos: comemorados assim que a cidade estiver livre. */
+  queueLevelUps(levels: number[]): void {
+    this.pendingLevelUps.push(...levels);
+  }
+
+  private showPendingLevelUp(): void {
+    if (!this.pendingLevelUps.length || this.ui.hasScreen || this.ui.modals.childElementCount || this.game.current !== this.city) return;
+    const lv = this.pendingLevelUps.shift()!;
+    showLevelUp(this, lv);
+  }
+
   /** Relógio de 1 s: conclui melhorias e atualiza o objetivo. */
   private tick(): void {
     const now = Date.now();
+    this.showPendingLevelUp();
     const done = this.store.data.city.buildings.filter((b) => b.upgradeEndsAt && b.upgradeEndsAt <= now);
     if (done.length) {
       this.store.update('upgrade-finish', (d) => finishUpgrades(d, now));
@@ -421,6 +438,11 @@ export class App {
       this.hud.setActive('city');
       return;
     }
+    if (tab === 'chests') {
+      openChests(this);
+      this.hud.setActive('city');
+      return;
+    }
     this.hud.setActive('city');
     this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
   }
@@ -529,7 +551,7 @@ export class App {
         if (d.progression.tutorialStep < 3) d.progression.tutorialStep++;
         return rw;
       });
-      for (const lv of rewards.levelsGained) setTimeout(() => this.ui.toast(`Nível de conta ${lv}!`, 'gold', 'star'), 1500);
+      this.queueLevelUps(rewards.levelsGained);
     }
     const replay: Replay = { setup: params.setup, commands: sim.log, hash: result.hash, meta: { attacker: params.setup.teams[0].name, defender: params.setup.teams[1].name, at: Date.now() } };
     const link = `${location.origin}${location.pathname}#replay=${encodeReplay(replay)}`;
@@ -575,22 +597,44 @@ export class App {
       });
   }
 
+  chestThumb(type: ChestType): Promise<string> {
+    return this.thumbs.request(`chest:${type}`, () => createChestView(type).root, { yaw: 0.55, pitch: 0.42, zoom: 0.9 });
+  }
+
+  openChests(): void {
+    this.navigate('chests');
+  }
+
   /** Mostra a vitrine 3D enquadrada num retângulo da tela (empilhável). */
   pushShowroom(frame: () => DOMRect | null, setup: (s: Showroom) => void): void {
-    this.showroomStack.push({ frame, setup });
-    this.applyShowroom();
+    this.overlayStack.push({ kind: 'showroom', frame, setup });
+    this.applyOverlay();
   }
 
   popShowroom(): void {
-    this.showroomStack.pop();
-    this.applyShowroom();
+    this.popOverlay();
   }
 
-  private applyShowroom(): void {
-    const top = this.showroomStack[this.showroomStack.length - 1];
+  /** Overlay próprio (ex.: abertura de baú) por cima de tudo. */
+  pushOverlay(overlay: GameOverlay): void {
+    this.overlayStack.push({ kind: 'custom', overlay });
+    this.applyOverlay();
+  }
+
+  popOverlay(): void {
+    this.overlayStack.pop();
+    this.applyOverlay();
+  }
+
+  private applyOverlay(): void {
+    const top = this.overlayStack[this.overlayStack.length - 1];
+    if (!this.overlayStack.some((o) => o.kind === 'showroom')) this.showroom.dispose();
     if (!top) {
       this.game.overlay = null;
-      this.showroom.dispose();
+      return;
+    }
+    if (top.kind === 'custom') {
+      this.game.overlay = top.overlay;
       return;
     }
     this.showroom.frame = top.frame;

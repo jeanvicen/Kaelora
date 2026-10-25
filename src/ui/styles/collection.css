@@ -450,7 +450,7 @@
 }
 .cc-new {
   position: absolute;
-  top: 30px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%) rotate(-8deg);
   font-size: 15px;

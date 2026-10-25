@@ -7,6 +7,7 @@ import type { BattleRewards } from '../../meta/raids.ts';
 import type { BattleResult } from '../../sim/types.ts';
 import { h, tweenNumber } from '../dom.ts';
 import { icon } from '../icons.ts';
+import { openChestScreen } from './chestOpen.ts';
 
 export const CHEST_NAMES = { madeira: 'Baú de Madeira', prata: 'Baú de Prata', ouro: 'Baú de Ouro', magico: 'Baú Mágico', extremo: 'Baú Extremo' } as const;
 
@@ -31,8 +32,21 @@ export function showResult(
     if (rw.trophies) counter('trophy', rw.trophies, 'Troféus', true);
     counter('star', rw.accountXp, 'XP da conta', true);
   }
+  const openBtn = h(
+    'button',
+    {
+      class: 'btn small green res-open',
+      onClick: () => {
+        const item = [...app.save.chests.inventory].reverse().find((c) => c.type === rw?.chest);
+        if (!item) return;
+        openBtn.remove();
+        openChestScreen(app, item.uid);
+      },
+    },
+    'Abrir',
+  );
   const chest = rw?.chest
-    ? h('div', { class: `res-chest chest-${rw.chest}` }, h('div', { class: 'res-chest-ico' }, icon('chest')), h('span', { class: 'stroke-sm' }, CHEST_NAMES[rw.chest]))
+    ? h('div', { class: `res-chest chest-${rw.chest}` }, h('div', { class: 'res-chest-ico' }, icon('chest')), h('span', { class: 'stroke-sm' }, CHEST_NAMES[rw.chest]), openBtn)
     : rw?.chestBlocked
       ? h('div', { class: 'res-chest blocked' }, icon('chest'), h('span', null, 'Baús cheios! Abra algum para ganhar mais.'))
       : null;
