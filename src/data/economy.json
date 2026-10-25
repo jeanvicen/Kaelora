@@ -1,0 +1,171 @@
+{
+  "$schema": "Kaelora economy v1 — todos os números de balanceamento ficam aqui",
+  "start": {
+    "coins": 1000,
+    "diamonds": 60,
+    "element": "mare",
+    "chests": ["madeira"]
+  },
+  "account": {
+    "maxLevel": 40,
+    "xpToNext": [126, 184, 254, 336, 430, 536, 654, 784, 926, 1080, 1246, 1424, 1614, 1816, 2030, 2256, 2494, 2744, 3006, 3280, 3566, 3864, 4174, 4496, 4830, 5176, 5534, 5904, 6286, 6680, 7086, 7504, 7934, 8376, 8830, 9296, 9774, 10264, 10766],
+    "xp": {
+      "battleWin": 30,
+      "battleLoss": 12,
+      "perStar": 10,
+      "build": 8,
+      "upgrade": 15,
+      "chestOpen": 10,
+      "mission": 25,
+      "raidDefended": 20,
+      "duelWin": 45,
+      "duelLoss": 15
+    },
+    "levelUpReward": { "coins": 250, "diamonds": 5 },
+    "unlocks": {
+      "1": ["invasao", "treinamento"],
+      "2": ["loja"],
+      "3": ["eventos", "bau-ouro"],
+      "4": ["passe"],
+      "5": ["ligas", "fim-protecao"],
+      "6": ["multiplayer"],
+      "8": ["bau-magico"],
+      "12": ["bau-extremo"]
+    }
+  },
+  "battle": {
+    "durationSec": 180,
+    "frenzySec": 30,
+    "energyMax": 10,
+    "energyStart": 5,
+    "energyRegenSec": 1.5,
+    "ultimateChargeFactor": 0.16,
+    "coinsPerStar": [40, 160, 320, 520],
+    "lootShare": 0.55,
+    "lootCapByCore": [600, 1200, 2200, 3600, 5600, 8000, 11000, 15000, 20000, 26000],
+    "trophies": { "winByStars": [0, 18, 24, 30], "loss": -12, "zeroStarLoss": -16 },
+    "squadXpByStars": [12, 30, 42, 60],
+    "chestByStars": [null, "madeira", "prata", "prata"],
+    "goldChestChance": 0.1,
+    "winStreakBonusCoins": 50
+  },
+  "training": {
+    "difficulties": [
+      { "id": "facil", "name": "Fácil", "power": 0.55 },
+      { "id": "normal", "name": "Normal", "power": 0.85 },
+      { "id": "dificil", "name": "Difícil", "power": 1.15 },
+      { "id": "insano", "name": "Insano", "power": 1.6 }
+    ],
+    "xpFactor": 0.35
+  },
+  "raid": {
+    "shieldHours": 12,
+    "retakeHours": 48,
+    "beginnerHours": 72,
+    "beginnerLevel": 5,
+    "retakeBonus": 0.3,
+    "restartPack": { "coins": 2500, "chest": "prata" },
+    "checkEveryHours": 6,
+    "raidChance": 0.45,
+    "ruinedRepairCostPerLevel": 80,
+    "ruinedRepairSecondsPerLevel": 20
+  },
+  "speedup": { "diamondsPerMinute": 0.4, "minDiamonds": 1, "freeUnderSeconds": 30 },
+  "characters": {
+    "maxLevel": 30,
+    "startLevel": 1,
+    "levelXp": [40, 60, 85, 115, 150, 190, 235, 285, 340, 400, 465, 535, 610, 690, 775, 865, 960, 1060, 1165, 1275, 1390, 1510, 1635, 1765, 1900, 2040, 2185, 2335, 2490],
+    "statPerLevel": 0.07,
+    "statPerStar": 0.12,
+    "fragmentsPerDuplicate": { "comum": 5, "raro": 8, "epico": 12, "lendario": 20, "extremo": 30 },
+    "starCosts": [
+      { "fragments": 10, "coins": 400 },
+      { "fragments": 25, "coins": 1500 },
+      { "fragments": 50, "coins": 5000 },
+      { "fragments": 100, "coins": 14000 }
+    ],
+    "rarityMultiplier": { "comum": 1.0, "raro": 1.2, "epico": 1.45, "lendario": 1.75, "extremo": 2.1 }
+  },
+  "leagues": [
+    { "id": "bronze", "name": "Bronze", "min": 0, "reward": { "coins": 500, "diamonds": 5, "chest": "madeira" } },
+    { "id": "prata", "name": "Prata", "min": 300, "reward": { "coins": 1200, "diamonds": 10, "chest": "prata" } },
+    { "id": "ouro", "name": "Ouro", "min": 800, "reward": { "coins": 2500, "diamonds": 20, "chest": "ouro" } },
+    { "id": "diamante", "name": "Diamante", "min": 1600, "reward": { "coins": 5000, "diamonds": 35, "chest": "ouro" } },
+    { "id": "mestre", "name": "Mestre", "min": 2600, "reward": { "coins": 9000, "diamonds": 60, "chest": "magico" } },
+    { "id": "extremo", "name": "Extremo", "min": 4000, "reward": { "coins": 15000, "diamonds": 100, "chest": "extremo" } }
+  ],
+  "freeChest": { "intervalHours": 4, "maxStored": 2, "type": "madeira", "upgradeChance": { "prata": 0.15, "ouro": 0.03 } },
+  "login": [
+    { "coins": 300 },
+    { "diamonds": 10 },
+    { "chest": "madeira" },
+    { "coins": 800 },
+    { "chest": "prata" },
+    { "diamonds": 30 },
+    { "chest": "ouro", "diamonds": 20 }
+  ],
+  "missions": {
+    "perDay": 3,
+    "pool": [
+      { "id": "win_battles", "text": "Vença {n} invasões", "goals": [2, 3, 4], "reward": { "coins": 400 } },
+      { "id": "earn_stars", "text": "Ganhe {n} estrelas em batalhas", "goals": [4, 6, 8], "reward": { "coins": 500 } },
+      { "id": "destroy_buildings", "text": "Destrua {n} construções", "goals": [15, 25, 40], "reward": { "diamonds": 5 } },
+      { "id": "use_abilities", "text": "Use {n} habilidades", "goals": [8, 12, 20], "reward": { "coins": 350 } },
+      { "id": "open_chests", "text": "Abra {n} baús", "goals": [1, 2, 3], "reward": { "coins": 300 } },
+      { "id": "collect_coins", "text": "Colete {n} moedas dos geradores", "goals": [800, 1500, 3000], "reward": { "diamonds": 4 } },
+      { "id": "upgrade_any", "text": "Melhore {n} construções", "goals": [1, 2, 3], "reward": { "coins": 450 } },
+      { "id": "use_ultimate", "text": "Use o Ultimate {n} vezes", "goals": [1, 2, 3], "reward": { "chest": "madeira" } },
+      { "id": "deal_damage", "text": "Cause {n} de dano", "goals": [15000, 30000, 60000], "reward": { "coins": 600 } },
+      { "id": "destroy_cores", "text": "Derrube {n} Núcleos", "goals": [1, 2, 3], "reward": { "chest": "prata" } }
+    ],
+    "allDoneReward": { "chest": "prata", "diamonds": 5 }
+  },
+  "pass": {
+    "seasonDays": 30,
+    "xpPerTier": 200,
+    "premiumCostDiamonds": 450,
+    "xp": { "battleWin": 40, "battleLoss": 15, "mission": 60, "chest": 10, "duel": 50 },
+    "tiers": 30,
+    "free": [
+      { "coins": 300 }, { "chest": "madeira" }, { "coins": 500 }, { "diamonds": 5 }, { "chest": "prata" },
+      { "coins": 800 }, { "chest": "madeira" }, { "diamonds": 10 }, { "coins": 1200 }, { "chest": "prata" },
+      { "coins": 1500 }, { "diamonds": 10 }, { "chest": "prata" }, { "coins": 2000 }, { "chest": "ouro" },
+      { "coins": 2200 }, { "diamonds": 15 }, { "chest": "prata" }, { "coins": 2600 }, { "chest": "ouro" },
+      { "coins": 3000 }, { "diamonds": 20 }, { "chest": "prata" }, { "coins": 3500 }, { "chest": "ouro" },
+      { "coins": 4000 }, { "diamonds": 25 }, { "chest": "ouro" }, { "coins": 5000 }, { "chest": "magico" }
+    ],
+    "premium": [
+      { "diamonds": 20 }, { "chest": "prata" }, { "coins": 1500 }, { "chest": "ouro" }, { "diamonds": 30 },
+      { "chest": "prata" }, { "coins": 3000 }, { "chest": "ouro" }, { "diamonds": 40 }, { "chest": "magico" },
+      { "coins": 5000 }, { "chest": "ouro" }, { "diamonds": 50 }, { "chest": "magico" }, { "coins": 8000 },
+      { "chest": "ouro" }, { "diamonds": 60 }, { "chest": "magico" }, { "coins": 12000 }, { "chest": "extremo" },
+      { "diamonds": 70 }, { "chest": "magico" }, { "coins": 15000 }, { "chest": "magico" }, { "diamonds": 90 },
+      { "chest": "extremo" }, { "coins": 20000 }, { "chest": "magico" }, { "diamonds": 120 }, { "character": "season" }
+    ]
+  },
+  "shop": {
+    "chests": [
+      { "type": "prata", "diamonds": 40 },
+      { "type": "ouro", "diamonds": 120 },
+      { "type": "magico", "diamonds": 320 },
+      { "type": "extremo", "diamonds": 900 }
+    ],
+    "coins": [
+      { "coins": 1000, "diamonds": 25 },
+      { "coins": 5500, "diamonds": 120 },
+      { "coins": 12000, "diamonds": 240 }
+    ],
+    "dailyDealDiscount": 0.4
+  },
+  "album": {
+    "milestones": [10, 25, 50, 75, 100],
+    "rewards": [
+      { "coins": 1000, "diamonds": 10 },
+      { "coins": 3000, "diamonds": 25, "chest": "prata" },
+      { "coins": 8000, "diamonds": 50, "chest": "ouro" },
+      { "coins": 15000, "diamonds": 100, "chest": "magico" },
+      { "coins": 30000, "diamonds": 250, "chest": "extremo" }
+    ]
+  },
+  "repairAll": { "diamondsPerBuilding": 3 }
+}
