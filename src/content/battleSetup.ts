@@ -1,8 +1,9 @@
 import economyJson from '../data/economy.json';
 import { BUILDINGS, distanceToEntrance, gridSizeForCore, levelStats } from '../meta/buildings.ts';
-import type { Element, PlacedBuilding } from '../meta/types.ts';
+import type { Element, PlacedBuilding, SaveData } from '../meta/types.ts';
 import { TICK_RATE, TILE, type BattleSetup, type StructureKind, type StructureSpec, type TeamSetup, type UnitSpec } from '../sim/types.ts';
-import { researchValue } from './squad.ts';
+import type { BotCity } from './botCity.ts';
+import { buildSquad, researchValue } from './squad.ts';
 
 const BATTLE = (economyJson as unknown as {
   battle: { durationSec: number; frenzySec: number; energyMax: number; energyStart: number; energyRegenSec: number; ultimateChargeFactor: number };
@@ -216,4 +217,24 @@ export function buildDuelSetup(p: {
     rules: rules({}),
     teams: [team(p.a, sa, sb, 4800), team(p.b, sb, sa, L - 4800)],
   };
+}
+
+/**
+ * Batalha de invasão a partir do save do atacante e da cidade-alvo. Cliente
+ * e servidor montam EXATAMENTE a mesma configuração com esta função — é o
+ * que permite o servidor re-simular a partida e validar o resultado.
+ */
+export function raidSetupFor(
+  save: Pick<SaveData, 'profile' | 'city' | 'squad' | 'collection'>,
+  target: Pick<BotCity, 'ownerName' | 'buildings' | 'element' | 'research'>,
+  seed: number,
+  event?: EventRules,
+): BattleSetup {
+  const { specs } = buildSquad(save.squad, save.collection, save.city.research, { eventHpPct: event?.attackerHpPct });
+  return buildRaidSetup({
+    seed,
+    attacker: { name: save.profile.name, element: save.city.element, squad: specs, research: save.city.research },
+    defender: { name: target.ownerName, city: { buildings: target.buildings, element: target.element }, research: target.research },
+    event,
+  });
 }

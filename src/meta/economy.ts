@@ -45,6 +45,8 @@ export interface EconomyConfig {
     raidChance: number;
     ruinedRepairCostPerLevel: number;
     ruinedRepairSecondsPerLevel: number;
+    raiderStrengthByCore: number[];
+    raiderSkill: number;
   };
   speedup: { diamondsPerMinute: number; minDiamonds: number; freeUnderSeconds: number };
   characters: {

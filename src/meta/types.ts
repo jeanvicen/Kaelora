@@ -107,6 +107,10 @@ export interface DefenseLogEntry {
   ruined: string[];
   replay: string; // replay codificado
   seen: boolean;
+  /** Nível da cidade rival (bot) ou id do jogador (online). */
+  attackerLevel?: number;
+  attackerId?: string;
+  trophies?: number;
 }
 
 export interface RevengeEntry {
@@ -118,6 +122,9 @@ export interface RevengeEntry {
   ruined: string[];
   expiresAt: number;
   done: boolean;
+  /** Para montar a cidade de quem saqueou: nível (bot) ou id do jogador (online). */
+  raiderLevel?: number;
+  raiderId?: string;
 }
 
 export interface RaidStatus {
