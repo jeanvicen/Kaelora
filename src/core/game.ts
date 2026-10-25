@@ -20,6 +20,8 @@ export class Game {
   private slowMo: { scale: number; until: number } | null = null;
   timeScale = 1;
   paused = false;
+  /** Uma tela opaca cobre o 3D: pula o render (economiza bateria). */
+  renderSuspended = false;
   fps = 60;
   private fpsAcc = 0;
   private fpsFrames = 0;
@@ -99,7 +101,7 @@ export class Game {
       this.onFrame?.(rawDt);
       if (this.current) {
         this.current.update(dt, this.time, rawDt);
-        this.renderer.render(this.current.scene, this.current.camera);
+        if (!this.renderSuspended) this.renderer.render(this.current.scene, this.current.camera);
       }
     };
     requestAnimationFrame(frame);

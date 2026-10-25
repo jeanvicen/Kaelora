@@ -286,6 +286,21 @@ export class CityScene implements GameScene {
     this.grid.showSelection(b.x, b.z, w, d);
   }
 
+  /** Câmera mergulha na entrada da cidade (transição para a batalha). */
+  diveToEntrance(): void {
+    const size = gridSize(this.host.getSave().city);
+    this.rig.dive(-3, size / 2);
+  }
+
+  resetCamera(): void {
+    this.rig.resetView();
+    const core = this.host.getSave().city.buildings.find((b) => b.type === 'core');
+    if (core) {
+      const c = worldCenter(core);
+      this.rig.focus(c.x - 1, c.z + 1, 30);
+    }
+  }
+
   focusOn(id: string): void {
     const b = this.host.getSave().city.buildings.find((x) => x.id === id);
     if (!b) return;

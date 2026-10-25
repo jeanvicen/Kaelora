@@ -147,3 +147,38 @@ let cloudOutline: OutlineMaterial | null = null;
 export function cloudOutlineMaterial(): OutlineMaterial {
   return (cloudOutline ??= createOutlineMaterial(0x6a78b8, 0.7));
 }
+
+/** Drone invocado (Invocador). */
+export function summonDroneModel(color: number): VoxelModel {
+  const p = new Palette();
+  const g = new VoxelGrid(10, 5, 10);
+  const body = p.add(C.metal);
+  const dark = p.add(C.metalDark);
+  const glow = p.add(color, { glow: 1 });
+  const eye = p.add(0xffffff, { glow: 1 });
+  g.ellipsoid(5, 2.5, 5, 3, 2.2, 3, body);
+  g.box(0, 3, 4, 10, 4, 6, dark);
+  g.box(4, 3, 0, 6, 4, 10, dark);
+  g.box(0, 4, 4, 2, 5, 6, glow);
+  g.box(8, 4, 4, 10, 5, 6, glow);
+  g.box(4, 4, 0, 6, 5, 2, glow);
+  g.box(4, 4, 8, 6, 5, 10, glow);
+  g.box(4, 1, 7, 6, 3, 8, eye);
+  return { grid: g, palette: p };
+}
+
+/** Torreta erguida pelo Construtor. */
+export function summonTurretModel(color: number): VoxelModel {
+  const p = new Palette();
+  const g = new VoxelGrid(10, 10, 12);
+  const base = p.add(C.metalDark);
+  const body = p.add(C.metal);
+  const glow = p.add(color, { glow: 1 });
+  g.box(1, 0, 1, 9, 2, 11, base);
+  g.box(3, 2, 3, 7, 5, 9, base);
+  g.box(2, 5, 2, 8, 9, 9, body);
+  g.box(4, 6, 9, 6, 8, 12, base);
+  g.box(4, 6, 11, 6, 8, 12, glow);
+  g.box(2, 8, 2, 8, 9, 9, glow);
+  return { grid: g, palette: p };
+}

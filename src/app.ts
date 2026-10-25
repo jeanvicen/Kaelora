@@ -26,6 +26,19 @@ import { createBuildingView } from './render/models/factory.ts';
 import { detectPreset, presetConfig } from './render/renderer.ts';
 import { Thumbnailer } from './render/thumbnailer.ts';
 import { CityScene } from './scenes/city/CityScene.ts';
+import { BattleScene, type BattleKind, type BattleParams } from './scenes/battle/BattleScene.ts';
+import { buildRaidSetup, type EventRules } from './content/battleSetup.ts';
+import type { BotCity } from './content/botCity.ts';
+import { getCharacter } from './content/catalog.ts';
+import { buildSquad } from './content/squad.ts';
+import { CharacterView } from './render/characterView.ts';
+import { applyBattleResult, consumeTarget } from './meta/raids.ts';
+import { metaRng } from './meta/rng.ts';
+import type { BattleSim } from './sim/battle.ts';
+import { decodeReplay, encodeReplay, type Replay } from './sim/replay.ts';
+import type { BattleResult } from './sim/types.ts';
+import { openInvasionMap } from './ui/screens/invasion.ts';
+import { showResult } from './ui/screens/result.ts';
 import { h } from './ui/dom.ts';
 import { CityHud, type NavTab } from './ui/hud/cityHud.ts';
 import { BuildingPanel, ELEMENT_NAMES } from './ui/panels/buildingPanel.ts';
@@ -34,6 +47,7 @@ import { EditBar } from './ui/panels/editBar.ts';
 import { openSettings } from './ui/screens/settings.ts';
 import { showLogin, showSplash } from './ui/screens/intro.ts';
 import { UI } from './ui/ui.ts';
+import { icon } from './ui/icons.ts';
 
 /**
  * Raiz do jogo: liga o save, o loop 3D, as cenas e a interface.
@@ -48,6 +62,8 @@ export class App {
   panel!: BuildingPanel;
   editBar!: EditBar;
   thumbs!: Thumbnailer;
+  battle!: BattleScene;
+  private battleCtx: { target: BotCity | null; kind: BattleKind; squad: number[]; revengeId?: string } | null = null;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -70,6 +86,7 @@ export class App {
     const graphics = loaded?.settings.graphics ?? detectPreset();
     this.game = new Game(this.canvas, graphics);
     this.thumbs = new Thumbnailer(this.game.renderer.renderer);
+    this.ui.onOpaqueChange = (covered) => (this.game.renderSuspended = covered);
     splash.setProgress(0.55);
     // Pequena pausa para o logo respirar (e as fontes carregarem).
     await Promise.all([document.fonts?.ready, new Promise((r) => setTimeout(r, 900))]);
@@ -101,6 +118,19 @@ export class App {
       presetConfig(graphics).cityLife,
     );
     this.game.register(this.city);
+    this.battle = new BattleScene({
+      uiRoot: this.ui.hud,
+      hitStop: (ms) => this.game.hitStop(ms),
+      slowMotion: (sc, t) => this.game.slowMotion(sc, t),
+      portrait: (id) => this.characterPortrait(id),
+      settings: () => {
+        const st = this.store.data.settings;
+        return { shake: st.shake, vibration: st.vibration, quality: presetConfig(st.graphics).particles };
+      },
+      onEnd: (result, sim, params) => this.onBattleEnd(result, sim, params),
+      onPause: () => this.openPause(),
+    });
+    this.game.register(this.battle);
     this.hud = new CityHud(this);
     this.panel = new BuildingPanel(this);
     this.editBar = new EditBar(this);
@@ -115,6 +145,13 @@ export class App {
     this.tick();
     this.registerServiceWorker();
     this.canvas.addEventListener('pointerdown', () => audio.unlock(), { once: true });
+    // replay compartilhado por link (#replay=...)
+    if (location.hash.startsWith('#replay=')) {
+      const rep = decodeReplay(location.hash.slice(8));
+      history.replaceState(null, '', location.pathname + location.search);
+      if (rep) setTimeout(() => this.watchReplay(rep), 600);
+      else this.ui.toast('Link de replay inválido', 'error');
+    }
   }
 
   private registerServiceWorker(): void {
@@ -362,12 +399,160 @@ export class App {
 
   navigate(tab: NavTab): void {
     if (this.city.mode !== 'view') this.toggleEdit();
-    if (tab === 'city') {
-      this.ui.closeAllScreens();
+    this.ui.closeAllScreens();
+    this.hud.setActive(tab);
+    if (tab === 'city') return;
+    if (tab === 'battle') {
+      openInvasionMap(this);
       this.hud.setActive('city');
       return;
     }
+    this.hud.setActive('city');
     this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
+  }
+
+  openTraining(): void {
+    this.ui.toast('Chegando na próxima fase do desenvolvimento!', 'info', 'clock');
+  }
+
+  // ------------------------------------------------------------ batalha
+
+  /** Invade uma cidade (rival bot, vingança ou evento). */
+  startRaid(target: BotCity, kind: BattleKind = 'raid', extra: { revengeId?: string; event?: EventRules; title?: string } = {}): void {
+    const save = this.save;
+    const { specs } = buildSquad(save.squad, save.collection, save.city.research, { eventHpPct: extra.event?.attackerHpPct });
+    const seed = this.store.update('battle-seed', (d) => metaRng(d).nextU32());
+    const setup = buildRaidSetup({
+      seed,
+      attacker: { name: save.profile.name, element: save.city.element, squad: specs, research: save.city.research },
+      defender: { name: target.ownerName, city: { buildings: target.buildings, element: target.element }, research: target.research },
+      event: extra.event,
+    });
+    this.battleCtx = { target, kind, squad: [...save.squad], revengeId: extra.revengeId };
+    this.launchBattle({
+      setup,
+      playerTeam: 0,
+      kind,
+      title: { name: extra.title ?? target.ownerName, sub: `${target.name} • Núcleo ${target.coreLevel}`, element: target.element },
+      timeOfDay: this.city.clock.t,
+      tutorial: save.stats.battles < 3 ? 1 : 0,
+    });
+  }
+
+  /** Transição cidade → batalha (1,5 s): mergulho, linhas de velocidade e clarão. */
+  launchBattle(params: BattleParams): void {
+    this.ui.closeAllScreens();
+    this.ui.closeAllModals();
+    if (this.city.mode !== 'view') this.toggleEdit();
+    this.city.select(null);
+    this.ui.setHud(null);
+    audio.play('whoosh');
+    vibrate(15);
+    const fx = h('div', { class: 'speed-lines' });
+    this.ui.fx.appendChild(fx);
+    if (this.game.current === this.city) this.city.diveToEntrance();
+    setTimeout(() => this.game.go('battle', params), 900);
+    setTimeout(() => fx.remove(), 1550);
+  }
+
+  watchReplay(rep: Replay): void {
+    this.battleCtx = null;
+    const def = rep.setup.teams[1];
+    this.launchBattle({
+      setup: rep.setup,
+      playerTeam: 0,
+      kind: 'replay',
+      replay: rep.commands,
+      title: { name: rep.setup.teams[0].name, sub: `contra ${def.name}`, element: def.element },
+      timeOfDay: 0.45,
+    });
+  }
+
+  private openPause(): void {
+    this.battle.setPaused(true);
+    this.game.paused = true;
+    const m = this.ui.modal(
+      h(
+        'div',
+        { class: 'panel confirm-box' },
+        h('div', { class: 'panel-head' }, h('div', { class: 'panel-title' }, 'Pausa')),
+        h(
+          'div',
+          { class: 'panel-body col' },
+          h('button', { class: 'btn green big', onClick: () => m.close() }, icon('play'), 'Continuar'),
+          h(
+            'button',
+            {
+              class: 'btn red',
+              onClick: async () => {
+                m.close();
+                const ok = await this.ui.confirm('Desistir?', 'A batalha termina agora e conta como derrota.', 'Desistir', 'Voltar', true);
+                if (ok) this.battle.surrender();
+              },
+            },
+            icon('flag'),
+            'Desistir',
+          ),
+        ),
+      ),
+      {
+        onClose: () => {
+          this.battle.setPaused(false);
+          this.game.paused = false;
+        },
+      },
+    );
+  }
+
+  private onBattleEnd(result: BattleResult, sim: BattleSim, params: BattleParams): void {
+    const ctx = this.battleCtx;
+    this.battleCtx = null;
+    let rewards = null;
+    if (ctx && params.kind !== 'replay' && params.kind !== 'defense') {
+      rewards = this.store.update('battle-end', (d) => {
+        const rw = applyBattleResult(d, { kind: ctx.kind === 'event' ? 'event' : ctx.kind === 'revenge' ? 'revenge' : ctx.kind === 'training' ? 'training' : 'raid', target: ctx.target, result, squad: ctx.squad, now: Date.now(), revengeId: ctx.revengeId });
+        if (ctx.target && ctx.kind === 'raid') consumeTarget(d, ctx.target.seed);
+        if (d.progression.tutorialStep < 3) d.progression.tutorialStep++;
+        return rw;
+      });
+      for (const lv of rewards.levelsGained) setTimeout(() => this.ui.toast(`Nível de conta ${lv}!`, 'gold', 'star'), 1500);
+    }
+    const replay: Replay = { setup: params.setup, commands: sim.log, hash: result.hash, meta: { attacker: params.setup.teams[0].name, defender: params.setup.teams[1].name, at: Date.now() } };
+    const link = `${location.origin}${location.pathname}#replay=${encodeReplay(replay)}`;
+    showResult(this, {
+      result,
+      rewards,
+      title: `${params.setup.teams[0].name} × ${params.setup.teams[1].name}`,
+      replayLink: link.length < 12000 ? link : null,
+      perspective: params.kind === 'defense' ? 'defender' : 'attacker',
+      onContinue: () => this.returnToCity(),
+      onReplay: () => this.watchReplay(replay),
+    });
+  }
+
+  returnToCity(): void {
+    this.ui.closeAllScreens();
+    this.ui.flash('#ffffff', 300, 0.7);
+    audio.play('whoosh', { volume: 0.6 });
+    this.game.go('city');
+    this.city.resetCamera();
+    this.showCityHud();
+    this.hud.setActive('city');
+    this.hud.refresh();
+  }
+
+  characterPortrait(id: number): Promise<string> {
+    return this.thumbs.request(
+      `c:${id}`,
+      () => {
+        const v = new CharacterView(getCharacter(id));
+        v.face(1, Math.PI / 2 - 0.35);
+        v.shadow.visible = false;
+        v.update(0);
+        return v.root;
+      },
+      { focusY: 0.74, zoom: 0.6, yaw: 0, pitch: 0.1 },
+    );
   }
 
   openShop(): void {

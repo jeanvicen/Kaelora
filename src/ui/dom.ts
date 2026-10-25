@@ -3,7 +3,7 @@
 type Child = Node | string | number | null | undefined | false | Child[];
 type Attrs = Record<string, unknown> & {
   class?: string;
-  style?: string | Partial<CSSStyleDeclaration>;
+  style?: string | Partial<CSSStyleDeclaration> | Record<`--${string}`, string>;
   onClick?: (e: MouseEvent) => void;
 };
 

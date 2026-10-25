@@ -17,7 +17,13 @@ export class UI {
   readonly modals: HTMLElement;
   readonly toasts: HTMLElement;
   readonly fx: HTMLElement;
-  private screenStack: { el: HTMLElement; onClose?: () => void }[] = [];
+  private screenStack: { el: HTMLElement; onClose?: () => void; opaque: boolean }[] = [];
+  /** Avisado quando muda se há tela opaca cobrindo o 3D. */
+  onOpaqueChange: ((covered: boolean) => void) | null = null;
+
+  private notifyOpaque(): void {
+    this.onOpaqueChange?.(this.screenStack.some((s) => s.opaque));
+  }
 
   constructor(readonly root: HTMLElement) {
     this.hud = h('div', { class: 'layer layer-hud' });
@@ -44,11 +50,13 @@ export class UI {
   }
 
   /** Abre uma tela cheia por cima do HUD (com animação de entrada). */
-  openScreen(el: HTMLElement, onClose?: () => void): void {
+  openScreen(el: HTMLElement, onClose?: () => void, opaque = true): void {
     el.classList.add('screen', 'screen-enter');
     this.screens.appendChild(el);
-    this.screenStack.push({ el, onClose });
+    this.screenStack.push({ el, onClose, opaque });
     requestAnimationFrame(() => el.classList.remove('screen-enter'));
+    // só esconde o 3D depois da animação de entrada
+    setTimeout(() => this.notifyOpaque(), 260);
     audio.play('open');
   }
 
@@ -59,6 +67,7 @@ export class UI {
     audio.play('close');
     setTimeout(() => top.el.remove(), 200);
     top.onClose?.();
+    this.notifyOpaque();
   }
 
   closeAllScreens(): void {
@@ -67,6 +76,7 @@ export class UI {
       top.el.remove();
       top.onClose?.();
     }
+    this.notifyOpaque();
   }
 
   get hasScreen(): boolean {

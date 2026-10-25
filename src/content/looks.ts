@@ -39,10 +39,10 @@ export function generateLook(cls: ClassId, element: Element, rarity: Rarity, var
   const pal = ELEMENT_PALETTE[element];
   let hat = style.hats[(variant + rng.int(2)) % style.hats.length];
   let accessory = style.acc[rng.int(style.acc.length)];
-  if (rarity === 'lendario' && rng.int(100) < 45) hat = cls === 'curandeiro' ? 'halo' : 'crown';
+  if (rarity === 'lendario' && rng.int(100) < 20) hat = cls === 'curandeiro' ? 'halo' : 'crown';
   if (rarity === 'extremo') {
     accessory = rng.int(100) < 55 ? 'wings' : 'aura';
-    if (rng.int(100) < 50) hat = 'crown';
+    if (rng.int(100) < 30) hat = 'crown';
   }
   if (rarity === 'epico' && accessory === 'none') accessory = 'cape';
   const neutral = [0xf6f2ea, 0x3a3f5c, 0xeadfc8, 0x2e3452, 0xb9c3de];

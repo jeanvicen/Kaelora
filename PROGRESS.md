@@ -30,7 +30,26 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 **Bugs conhecidos / observações**
 - Antialias do WebGL é definido ao criar o contexto: trocar de/para o preset Baixo só muda o antialias depois de recarregar.
 
-## Fase 2 — Batalha ⏳
+## Fase 2 — Batalha ✅
+
+**Feito**
+- Simulação determinística em `src/sim` (sem Three.js/DOM): tick fixo de 30 Hz, matemática inteira (milésimos de casa), RNG `sfc32` por semente, hash FNV do estado, sem `Math.random()`/`Date.now()` (teste que varre a pasta garante).
+- Energia exata (máx. 10, +1 a cada 1,5 s; Frenesi 2× nos últimos 30 s), cartas de 2 a 7, recarga para voltar à mão, habilidade por personagem com anel de recarga, barra de Ultimate que enche com o dano, vantagem de elemento (+30%) nos dois ciclos, estrelas (50% / Núcleo / 60 s sobrando), tempo esgotado, desistência.
+- Defesas seguem a ordem salva na cidade (distância até a entrada): barreiras, 5 torres, armadilhas escondidas até ativar, geradores/cofre/quartel/lab como alvos, Núcleo no fim.
+- IA do bot dentro da simulação (RNG separado) para cidade-bot e duelos; replays = configuração + lista de jogadas, link compartilhável `#replay=`; `runBattle` headless (~5 ms por batalha).
+- Personagens voxel chibi gerados por código com animações procedurais (idle, andar, atacar, habilidade, dano, morte, comemoração) e miniaturas renderizadas.
+- Cena lateral 2.5D da estrada: ponte entre as ilhas, cidade do defensor com skyline neon, portal, ilhas distantes; câmera que acompanha a linha de frente.
+- Transição cidade → batalha: câmera mergulha na entrada, linhas de velocidade, som de "whoosh" e descida para a vista lateral (~1,5 s).
+- Juice: hit stop 45–80 ms, tremor proporcional ao dano, números flutuantes (crítico amarelo e maior), combos, câmera lenta de 1 s + explosão voxel na queda do Núcleo, colapso de construções em cubos, raios Tesla, lasers, ondas de choque, `navigator.vibrate`, som em camadas (impacto + voz + multidão), cinemática de Ultimate.
+- Mapa de Invasão com 3 cidades-bot (dificuldade estimada simulando 3 batalhas), trocar rivais com moedas, chips de vantagem de elemento.
+- Tela de resultado com estrelas animadas, moedas, troféus, XP, baú ganho e link do replay; pausa com desistir.
+- Tutorial guiado nas 3 primeiras batalhas (dicas contextuais).
+- O render 3D é suspenso enquanto uma tela opaca cobre o jogo (economiza bateria).
+- Testes: determinismo, replay, energia, Frenesi, ciclo de cartas, vantagem, estrelas, tempo esgotado, armadilhas, duelo, ordem da estrada (27 testes na simulação/personagens).
+
+**Bugs conhecidos / observações**
+- Balanceamento inicial: o esquadrão inicial vence com folga cidades-bot de Núcleo 1–2 e perde a partir do Núcleo 4 (sondagem com 400 batalhas headless).
+
 ## Fase 3 — Coleção ⏳
 ## Fase 4 — Baús e Economia ⏳
 ## Fase 5 — Online ⏳

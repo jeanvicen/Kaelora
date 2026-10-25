@@ -18,6 +18,10 @@ export class IsoCameraRig {
   private goalDistance: number | null = null;
   private trauma = 0;
   private shakeT = 0;
+  private pitchGoal: number | null = null;
+  private yawGoal: number | null = null;
+  readonly basePitch = THREE.MathUtils.degToRad(52);
+  readonly baseYaw = Math.PI / 4;
 
   constructor(fov = 30) {
     this.camera = new THREE.PerspectiveCamera(fov, 1, 0.5, 900);
@@ -51,6 +55,20 @@ export class IsoCameraRig {
     this.goalDistance = null;
   }
 
+  /** Mergulho cinematográfico (transição para a batalha). */
+  dive(x: number, z: number): void {
+    this.goalTarget = new THREE.Vector3(x, 0, z);
+    this.goalDistance = 7;
+    this.pitchGoal = THREE.MathUtils.degToRad(14);
+    this.yawGoal = Math.PI / 2 + 0.2;
+  }
+
+  /** Volta ao ângulo normal da cidade. */
+  resetView(): void {
+    this.pitchGoal = this.basePitch;
+    this.yawGoal = this.baseYaw;
+  }
+
   focus(x: number, z: number, distance?: number): void {
     this.goalTarget = new THREE.Vector3(x, 0, z);
     if (distance !== undefined) this.goalDistance = distance;
@@ -78,6 +96,14 @@ export class IsoCameraRig {
     if (this.goalDistance !== null) {
       this.distance += (this.goalDistance - this.distance) * (1 - Math.pow(0.002, dt));
       if (Math.abs(this.distance - this.goalDistance) < 0.01) this.goalDistance = null;
+    }
+    if (this.pitchGoal !== null) {
+      this.pitch += (this.pitchGoal - this.pitch) * (1 - Math.pow(0.02, dt));
+      if (Math.abs(this.pitch - this.pitchGoal) < 0.001) this.pitchGoal = null;
+    }
+    if (this.yawGoal !== null) {
+      this.yaw += (this.yawGoal - this.yaw) * (1 - Math.pow(0.02, dt));
+      if (Math.abs(this.yaw - this.yawGoal) < 0.001) this.yawGoal = null;
     }
     const cp = Math.cos(this.pitch);
     const off = new THREE.Vector3(Math.sin(this.yaw) * cp, Math.sin(this.pitch), Math.cos(this.yaw) * cp).multiplyScalar(this.distance);
