@@ -46921,7 +46921,7 @@ var E = e.battle, _e = {
 	barracks: 1300,
 	lab: 1300
 }, ve = (e) => _e[e] ?? (e === "generator" || e === "vault" ? 1e3 : 900);
-function ye(e, r, i) {
+function D(e, r, i) {
 	let a = t[e.type], o = n(e.type, e.level), s = e.type, c = o.hp, l = o.dmg ?? 0;
 	s === "core" && (c = Math.round(c * (100 + T(r, "vida_nucleo") + (i.coreHpPct ?? 0)) / 100)), (a.battle.role === "tower" || s === "core") && (l = Math.round(l * (100 + T(r, "dano_torres") + (i.towerDmgPct ?? 0)) / 100));
 	let u = a.battle.role === "tower" || s === "core";
@@ -46944,7 +46944,7 @@ function ye(e, r, i) {
 		weight: 1
 	};
 }
-function be(e, r, a = {}) {
+function ye(e, r, a = {}) {
 	let o = e.buildings.find((e) => e.type === "core"), s = i(o?.level ?? 1), c = [], l = [];
 	for (let n of e.buildings) {
 		if (n.ruined || t[n.type].battle.role === "none") continue;
@@ -46954,13 +46954,13 @@ function be(e, r, a = {}) {
 			b: n
 		}) : n.type !== "core" && c.push({
 			d: e,
-			spec: ye(n, r, a)
+			spec: D(n, r, a)
 		});
 	}
 	l.sort((e, t) => e.d - t.d);
 	let d = 100 + T(r, "vida_barreiras"), f = [], p = () => {
 		if (!f.length) return;
-		let e = f.reduce((e, t) => e + n("barrier", t.b.level).hp, 0), t = Math.max(...f.map((e) => e.b.level)), i = ye(f[0].b, r, a);
+		let e = f.reduce((e, t) => e + n("barrier", t.b.level).hp, 0), t = Math.max(...f.map((e) => e.b.level)), i = D(f[0].b, r, a);
 		i.hp = Math.max(1, Math.round(e * .6 * d / 100)), i.level = t, i.refIds = f.map((e) => e.b.id), i.weight = 0, c.push({
 			d: f.reduce((e, t) => e + t.d, 0) / f.length,
 			spec: i
@@ -46975,7 +46975,7 @@ function be(e, r, a = {}) {
 	}
 	let x = c.map((e) => e.spec);
 	if (o) {
-		let e = ye(o, r, a);
+		let e = D(o, r, a);
 		e.x = Math.max(g - 3500, (b ? b.x + ve(b.kind) : m) + 1400 + 2500), g = Math.max(g, e.x + 3500), x.push(e);
 	}
 	return {
@@ -46983,7 +46983,7 @@ function be(e, r, a = {}) {
 		roadLength: g
 	};
 }
-function xe(e) {
+function be(e) {
 	return {
 		durationTicks: Math.round((e.durationSec ?? E.durationSec) * 30),
 		frenzyTicks: Math.round(E.frenzySec * 30),
@@ -46991,22 +46991,22 @@ function xe(e) {
 		energyRegenTicks: Math.round(E.energyRegenSec * 30)
 	};
 }
-function Se(e, t, n) {
+function xe(e, t, n) {
 	let r = t.reduce((e, t) => e + (t.kind === "trap" ? 0 : t.hp), 0), i = t.filter((e) => e.kind !== "trap").length || 1, a = Math.max(500, Math.round(r * E.ultimateChargeFactor * (1 - T(n, "carga_ultimate") / 100))), o = e.reduce((e, t) => e + t.dmg, 0);
 	return {
 		charge: a,
 		damage: Math.round(o * 1.8 + r / i * .12)
 	};
 }
-function Ce(e) {
-	let t = e.event ?? {}, n = be(e.defender.city, e.defender.research, t), r = {
+function Se(e) {
+	let t = e.event ?? {}, n = ye(e.defender.city, e.defender.research, t), r = {
 		name: e.attacker.name,
 		element: e.attacker.element,
 		squad: e.attacker.squad,
 		structures: [],
 		energyStart: E.energyStart + T(e.attacker.research, "energia_inicial"),
 		energyRegen: 100 + T(e.attacker.research, "recarga_energia") + (t.energyRegenPct ?? 0),
-		ultimate: Se(e.attacker.squad, n.structures, e.attacker.research),
+		ultimate: xe(e.attacker.squad, n.structures, e.attacker.research),
 		bot: e.attacker.bot ?? null
 	}, i = {
 		name: e.defender.name,
@@ -47026,13 +47026,52 @@ function Ce(e) {
 		seed: e.seed >>> 0,
 		mode: "raid",
 		roadLength: n.roadLength,
-		rules: xe(t),
+		rules: be(t),
 		teams: [r, i]
+	};
+}
+function Ce(e) {
+	let t = 52e3, r = Math.max(1, Math.min(10, e.level)), i = (e, t) => {
+		let n = D({
+			id: `duel-${e}-${t}`,
+			type: e,
+			level: r,
+			x: 0,
+			z: 0,
+			rot: 0
+		}, void 0, {});
+		return n.x = t, n;
+	}, a = (e) => {
+		let a = (n) => e === 0 ? n : t - n, o = i("barrier", a(13500));
+		return o.hp = Math.round(n("barrier", r).hp * 2.2), o.weight = 0, [
+			i("core", a(2600)),
+			i("cannon", a(8500)),
+			i("laser", a(11e3)),
+			o
+		];
+	}, o = a(0), s = a(1), c = (e, t, n, r) => ({
+		name: e.name,
+		element: e.element,
+		squad: e.squad,
+		structures: t,
+		energyStart: E.energyStart + T(e.research, "energia_inicial"),
+		energyRegen: 100 + T(e.research, "recarga_energia"),
+		ultimate: xe(e.squad, n, e.research),
+		bot: e.bot ?? null,
+		spawnX: r
+	});
+	return {
+		version: 1,
+		seed: e.seed >>> 0,
+		mode: "duel",
+		roadLength: t,
+		rules: be({}),
+		teams: [c(e.a, o, s, 4800), c(e.b, s, o, 47200)]
 	};
 }
 function we(e, t, n, r) {
 	let i = ge(e, r?.element), { specs: a } = fe(i.ids, i.collection, e.city.research, { eventHpPct: r?.attackerHpPct });
-	return Ce({
+	return Se({
 		seed: n,
 		attacker: {
 			name: e.profile.name,
@@ -47052,7 +47091,7 @@ function we(e, t, n, r) {
 	});
 }
 // src/sim/rng.ts
-var D = class {
+var O = class {
 	a;
 	b;
 	c;
@@ -47097,12 +47136,12 @@ var D = class {
 		];
 	}
 };
-function O(e) {
+function k(e) {
 	let t = 2166136261;
 	for (let n = 0; n < e.length; n++) t ^= e.charCodeAt(n), t = Math.imul(t, 16777619) >>> 0;
 	return t >>> 0;
 }
-function k(e, t) {
+function A(e, t) {
 	let n = (e ^ Math.imul(t, 2654435761)) >>> 0;
 	return n = Math.imul(n ^ n >>> 16, 2246822507) >>> 0, n = Math.imul(n ^ n >>> 13, 3266489909) >>> 0, (n ^ n >>> 16) >>> 0;
 }
@@ -47197,8 +47236,8 @@ function je(e, t, n, r, a, o = 3) {
 	}
 	return !1;
 }
-function A(e, t) {
-	let n = new D(k(e, 31337)), a = Math.max(1, Math.min(10, t)), o = i(a), s = n.pick(w), c = {
+function j(e, t) {
+	let n = new O(A(e, 31337)), a = Math.max(1, Math.min(10, t)), o = i(a), s = n.pick(w), c = {
 		element: s,
 		buildings: [],
 		storage: [],
@@ -47255,7 +47294,7 @@ function A(e, t) {
 		"dano_torres",
 		"vida_nucleo"
 	]) S[e] = Math.min(5, Math.floor((a - 3) / 1.5) + n.int(2));
-	let ee = Ae(n), te = Math.max(0, (a - 1) * 260 + n.range(-120, 160)), C = Me(k(e, 77), a);
+	let ee = Ae(n), te = Math.max(0, (a - 1) * 260 + n.range(-120, 160)), C = Me(A(e, 77), a);
 	return {
 		seed: e,
 		name: `${n.pick(ke)} ${ee.split(/[ _]/)[0]}`,
@@ -47271,7 +47310,7 @@ function A(e, t) {
 	};
 }
 function Me(e, t) {
-	let n = new D(e), r = Math.max(1, Math.min(10, t)), i = r <= 1 ? [
+	let n = new O(e), r = Math.max(1, Math.min(10, t)), i = r <= 1 ? [
 		"comum",
 		"comum",
 		"comum",
@@ -47415,45 +47454,45 @@ var Pe = {
 		magico: "bau-magico",
 		extremo: "bau-extremo"
 	}
-}, j = e;
+}, M = e;
 function Fe(e) {
-	let t = j.account.xpToNext;
+	let t = M.account.xpToNext;
 	return t[Math.min(t.length - 1, Math.max(0, e - 1))];
 }
-function M(e, t) {
+function N(e, t) {
 	let n = [], r = e.profile;
-	for (r.accountXp += Math.max(0, Math.round(t)); r.accountLevel < j.account.maxLevel && r.accountXp >= Fe(r.accountLevel);) {
+	for (r.accountXp += Math.max(0, Math.round(t)); r.accountLevel < M.account.maxLevel && r.accountXp >= Fe(r.accountLevel);) {
 		r.accountXp -= Fe(r.accountLevel), r.accountLevel++, n.push(r.accountLevel);
-		let t = j.account.levelUpReward;
+		let t = M.account.levelUpReward;
 		e.currencies.coins += (t.coins ?? 0) * r.accountLevel, e.currencies.diamonds += t.diamonds ?? 0;
 	}
 	return n;
 }
 function Ie(e) {
 	let t = /* @__PURE__ */ new Set();
-	for (let [n, r] of Object.entries(j.account.unlocks)) if (e >= Number(n)) for (let e of r) t.add(e);
+	for (let [n, r] of Object.entries(M.account.unlocks)) if (e >= Number(n)) for (let e of r) t.add(e);
 	return t;
 }
 function Le(e, t) {
 	return Ie(e.profile.accountLevel).has(t);
 }
 function Re(e) {
-	let t = j.speedup;
+	let t = M.speedup;
 	return e <= t.freeUnderSeconds ? 0 : Math.max(t.minDiamonds, Math.ceil(e / 60 * t.diamondsPerMinute));
 }
 function ze(e) {
-	let t = j.leagues[0];
-	for (let n of j.leagues) e >= n.min && (t = n);
+	let t = M.leagues[0];
+	for (let n of M.leagues) e >= n.min && (t = n);
 	return t;
 }
 // src/meta/missions.ts
-function N(e, t, n) {
+function P(e, t, n) {
 	if (!(n <= 0 || !e.missions?.list)) for (let r of e.missions.list) r.id === t && !r.claimed && (r.progress = Math.min(r.goal, r.progress + n));
 }
-var P = (e) => ({
+var F = (e) => ({
 	ok: !1,
 	reason: e
-}), F = { ok: !0 };
+}), I = { ok: !0 };
 function Be(e) {
 	return n(e, 1).cost;
 }
@@ -47463,8 +47502,8 @@ function Ve(e, n) {
 }
 function He(e, t, n, r, i, a) {
 	let o = Ve(e, t);
-	if (o) return P(o);
-	if (!d(e.city, t, n, r, i)) return P("Posição inválida");
+	if (o) return F(o);
+	if (!d(e.city, t, n, r, i)) return F("Posição inválida");
 	e.currencies.coins -= Be(t);
 	let s = {
 		id: g(t, a),
@@ -47474,30 +47513,30 @@ function He(e, t, n, r, i, a) {
 		z: r,
 		rot: i
 	};
-	return t === "generator" && (s.lastCollectAt = a), e.city.buildings.push(s), M(e, j.account.xp.build), {
+	return t === "generator" && (s.lastCollectAt = a), e.city.buildings.push(s), N(e, M.account.xp.build), {
 		ok: !0,
 		building: s
 	};
 }
 function Ue(e, t, n, r, i) {
 	let a = e.city.buildings.find((e) => e.id === t);
-	return a ? d(e.city, a.type, n, r, i, t) ? (a.x = n, a.z = r, a.rot = (i % 4 + 4) % 4, F) : P("Posição inválida") : P("Construção não encontrada");
+	return a ? d(e.city, a.type, n, r, i, t) ? (a.x = n, a.z = r, a.rot = (i % 4 + 4) % 4, I) : F("Posição inválida") : F("Construção não encontrada");
 }
 function We(e, t) {
 	let n = e.city.buildings.findIndex((e) => e.id === t);
-	if (n < 0) return P("Construção não encontrada");
+	if (n < 0) return F("Construção não encontrada");
 	let r = e.city.buildings[n];
-	return r.type === "core" ? P("O Núcleo não pode ser guardado") : r.upgradeEndsAt ? P("Espere a melhoria terminar") : (e.city.buildings.splice(n, 1), e.city.storage.push({
+	return r.type === "core" ? F("O Núcleo não pode ser guardado") : r.upgradeEndsAt ? F("Espere a melhoria terminar") : (e.city.buildings.splice(n, 1), e.city.storage.push({
 		id: r.id,
 		type: r.type,
 		level: r.level
-	}), F);
+	}), I);
 }
 function Ge(e, t, n, r, i, a) {
 	let o = e.city.storage.findIndex((e) => e.id === t);
-	if (o < 0) return P("Item não está no estoque");
+	if (o < 0) return F("Item não está no estoque");
 	let s = e.city.storage[o];
-	if (!d(e.city, s.type, n, r, i)) return P("Posição inválida");
+	if (!d(e.city, s.type, n, r, i)) return F("Posição inválida");
 	e.city.storage.splice(o, 1);
 	let c = {
 		id: s.id,
@@ -47507,7 +47546,7 @@ function Ge(e, t, n, r, i, a) {
 		z: r,
 		rot: i
 	};
-	return s.type === "generator" && (c.lastCollectAt = a), e.city.buildings.push(c), F;
+	return s.type === "generator" && (c.lastCollectAt = a), e.city.buildings.push(c), I;
 }
 function Ke(e) {
 	return e.city.buildings.filter((e) => e.upgradeEndsAt);
@@ -47517,16 +47556,16 @@ function qe(e, r) {
 }
 function Je(e, t, r) {
 	let i = e.city.buildings.find((e) => e.id === t);
-	if (!i) return P("Construção não encontrada");
+	if (!i) return F("Construção não encontrada");
 	let a = qe(e, i);
-	if (a) return P(a);
+	if (a) return F(a);
 	let o = n(i.type, i.level + 1);
-	return e.currencies.coins -= o.cost, N(e, "upgrade_any", 1), o.time <= 0 ? Ye(e, i, r) : i.upgradeEndsAt = r + o.time * 1e3, F;
+	return e.currencies.coins -= o.cost, P(e, "upgrade_any", 1), o.time <= 0 ? Ye(e, i, r) : i.upgradeEndsAt = r + o.time * 1e3, I;
 }
 function Ye(e, t, n) {
 	t.type === "generator" && (e.currencies.coins += $e(t, n), t.lastCollectAt = n);
 	let r = i(a(e.city));
-	if (t.level++, t.upgradeEndsAt = void 0, M(e, j.account.xp.upgrade), t.type === "core") {
+	if (t.level++, t.upgradeEndsAt = void 0, N(e, M.account.xp.upgrade), t.type === "core") {
 		let n = i(t.level), a = Math.floor((n - r) / 2);
 		if (a > 0) for (let t of e.city.buildings) t.x += a, t.z += a;
 	}
@@ -47541,9 +47580,9 @@ function Ze(e, t) {
 }
 function Qe(e, t, n) {
 	let r = e.city.buildings.find((e) => e.id === t);
-	if (!r || !r.upgradeEndsAt) return P("Nada para acelerar");
+	if (!r || !r.upgradeEndsAt) return F("Nada para acelerar");
 	let i = Ze(r, n);
-	return e.currencies.diamonds < i ? P("Diamantes insuficientes") : (e.currencies.diamonds -= i, r.upgradeEndsAt = n, Xe(e, n), F);
+	return e.currencies.diamonds < i ? F("Diamantes insuficientes") : (e.currencies.diamonds -= i, r.upgradeEndsAt = n, Xe(e, n), I);
 }
 function $e(e, t) {
 	if (e.type !== "generator" || e.ruined) return 0;
@@ -47554,7 +47593,7 @@ function et(e, t, n) {
 	let r = e.city.buildings.find((e) => e.id === t);
 	if (!r) return 0;
 	let i = $e(r, n);
-	return i <= 0 ? 0 : (e.currencies.coins += i, r.lastCollectAt = n, N(e, "collect_coins", i), i);
+	return i <= 0 ? 0 : (e.currencies.coins += i, r.lastCollectAt = n, P(e, "collect_coins", i), i);
 }
 function tt(e) {
 	let t = 0;
@@ -47566,48 +47605,48 @@ function tt(e) {
 	return Math.min(e.currencies.coins, t);
 }
 function nt(e) {
-	return e.level * j.raid.ruinedRepairCostPerLevel;
+	return e.level * M.raid.ruinedRepairCostPerLevel;
 }
 function rt(e, t) {
 	let n = e.city.buildings.find((e) => e.id === t);
-	if (!n || !n.ruined) return P("Nada para reparar");
+	if (!n || !n.ruined) return F("Nada para reparar");
 	let r = nt(n);
-	return e.currencies.coins < r ? P("Moedas insuficientes") : (e.currencies.coins -= r, n.ruined = !1, F);
+	return e.currencies.coins < r ? F("Moedas insuficientes") : (e.currencies.coins -= r, n.ruined = !1, I);
 }
 function it(e) {
 	let t = e.city.buildings.filter((e) => e.type === "barracks" && !e.ruined);
 	return t.length === 0 ? 5 : Math.max(...t.map((e) => n("barracks", e.level).maxCharLevel ?? 5));
 }
 // src/meta/rng.ts
-function I(e) {
-	return e.rng.counter = e.rng.counter + 1 >>> 0, new D(k(e.rng.seed, e.rng.counter));
+function L(e) {
+	return e.rng.counter = e.rng.counter + 1 >>> 0, new O(A(e.rng.seed, e.rng.counter));
 }
 var at = 36e5;
 function ot(e, t, n = !1) {
 	if (n || e.targets.seeds.length < 3 || t - e.targets.refreshedAt > 6 * at) {
-		let n = I(e);
+		let n = L(e);
 		e.targets.seeds = [
 			0,
 			1,
 			2
 		].map(() => n.nextU32()), e.targets.refreshedAt = t;
 	}
-	let r = I({
+	let r = L({
 		...e,
 		rng: { ...e.rng }
 	}), i = a(e.city);
-	return e.targets.seeds.map((t, n) => A(t, e.stats.battles < 3 ? 1 : Math.max(1, Math.min(10, Ne(e.profile.trophies, i, r) + (n - 1)))));
+	return e.targets.seeds.map((t, n) => j(t, e.stats.battles < 3 ? 1 : Math.max(1, Math.min(10, Ne(e.profile.trophies, i, r) + (n - 1)))));
 }
 function st(e) {
 	return 40 * a(e.city);
 }
 function ct(e, t) {
 	let n = e.targets.seeds.indexOf(t);
-	n >= 0 && (e.targets.seeds[n] = I(e).nextU32());
+	n >= 0 && (e.targets.seeds[n] = L(e).nextU32());
 }
-function L(e, t, n, r) {
+function R(e, t, n, r) {
 	return e.chests.inventory.length >= 8 ? !1 : (e.chests.inventory.push({
-		uid: `c${r.toString(36)}${I(e).nextU32().toString(36)}`,
+		uid: `c${r.toString(36)}${L(e).nextU32().toString(36)}`,
 		type: t,
 		source: n,
 		receivedAt: r
@@ -47622,14 +47661,14 @@ function lt(e, t, n) {
 		capped: !1
 	};
 	if (!r) return i;
-	let a = Math.min(j.characters.maxLevel, it(e));
+	let a = Math.min(M.characters.maxLevel, it(e));
 	r.xp += n;
-	let o = j.characters.levelXp;
+	let o = M.characters.levelXp;
 	for (; r.level < a && r.xp >= o[Math.min(o.length - 1, r.level - 1)];) r.xp -= o[Math.min(o.length - 1, r.level - 1)], r.level++;
 	return r.level >= a && (i.capped = !0, r.xp = Math.min(r.xp, o[Math.min(o.length - 1, r.level - 1)])), i.levelAfter = r.level, i;
 }
 function ut(e, t) {
-	let n = j.battle, r = t.result, i = r.winner === 0, o = r.stars, s = t.kind === "training", c = {
+	let n = M.battle, r = t.result, i = r.winner === 0, o = r.stars, s = t.kind === "training", c = {
 		won: i,
 		stars: o,
 		coins: 0,
@@ -47657,42 +47696,42 @@ function ut(e, t) {
 	if (t.kind === "revenge" && i && t.revengeId) {
 		let n = e.raids.revenge.find((e) => e.id === t.revengeId);
 		if (n && !n.done && n.expiresAt > t.now) {
-			c.revengeRecovered = Math.round(n.coinsLost * (1 + j.raid.retakeBonus)), n.done = !0;
+			c.revengeRecovered = Math.round(n.coinsLost * (1 + M.raid.retakeBonus)), n.done = !0;
 			for (let t of e.city.buildings) n.ruined.includes(t.id) && (t.ruined = !1);
 			e.raids.pendingChoice?.revengeId === n.id && (e.raids.pendingChoice = null);
 		}
 	}
 	if (i && !s) {
 		let r = n.chestByStars[o];
-		r && I(e).int(1e3) < n.goldChestChance * 1e3 && (r = "ouro"), r && (L(e, r, "Vitória em batalha", t.now) ? c.chest = r : c.chestBlocked = !0);
+		r && L(e).int(1e3) < n.goldChestChance * 1e3 && (r = "ouro"), r && (R(e, r, "Vitória em batalha", t.now) ? c.chest = r : c.chestBlocked = !0);
 	}
-	let u = j.account.xp, d = s ? j.training.xpFactor : 1;
-	c.accountXp = Math.round(((i ? u.battleWin : u.battleLoss) + u.perStar * o) * d), c.levelsGained = M(e, c.accountXp);
+	let u = M.account.xp, d = s ? M.training.xpFactor : 1;
+	c.accountXp = Math.round(((i ? u.battleWin : u.battleLoss) + u.perStar * o) * d), c.levelsGained = N(e, c.accountXp);
 	let f = Math.round(n.squadXpByStars[o] * (i ? 1 : .6) * d);
 	for (let n of t.squad) x(n) && c.characters.push(lt(e, n, f));
-	c.passXp = s ? 0 : i ? j.pass.xp.battleWin : j.pass.xp.battleLoss, e.pass.xp += c.passXp, e.currencies.coins += c.coins + c.loot + c.revengeRecovered, e.profile.trophies = Math.max(0, e.profile.trophies + c.trophies), e.profile.bestTrophies = Math.max(e.profile.bestTrophies, e.profile.trophies);
+	c.passXp = s ? 0 : i ? M.pass.xp.battleWin : M.pass.xp.battleLoss, e.pass.xp += c.passXp, e.currencies.coins += c.coins + c.loot + c.revengeRecovered, e.profile.trophies = Math.max(0, e.profile.trophies + c.trophies), e.profile.bestTrophies = Math.max(e.profile.bestTrophies, e.profile.trophies);
 	let p = e.stats;
-	return p.battles++, i && p.wins++, s && i && p.trainingWins++, t.kind === "duel" && i && p.duelsWon++, p.stars += o, r.coreDestroyed && p.coresDestroyed++, p.buildingsDestroyed += r.structuresDestroyed, p.damageDealt += r.damageDealt[0], s || (i && N(e, "win_battles", 1), N(e, "earn_stars", o), N(e, "destroy_buildings", r.structuresDestroyed), N(e, "use_abilities", r.abilitiesUsed[0]), N(e, "use_ultimate", r.ultimatesUsed[0]), N(e, "deal_damage", r.damageDealt[0]), r.coreDestroyed && N(e, "destroy_cores", 1)), t.kind === "event" && i && e.events.wins++, c;
+	return p.battles++, i && p.wins++, s && i && p.trainingWins++, t.kind === "duel" && i && p.duelsWon++, p.stars += o, r.coreDestroyed && p.coresDestroyed++, p.buildingsDestroyed += r.structuresDestroyed, p.damageDealt += r.damageDealt[0], s || (i && P(e, "win_battles", 1), P(e, "earn_stars", o), P(e, "destroy_buildings", r.structuresDestroyed), P(e, "use_abilities", r.abilitiesUsed[0]), P(e, "use_ultimate", r.ultimatesUsed[0]), P(e, "deal_damage", r.damageDealt[0]), r.coreDestroyed && P(e, "destroy_cores", 1)), t.kind === "event" && i && e.events.wins++, c;
 }
 // src/meta/rewards.ts
-function R(e, t, n, r) {
+function z(e, t, n, r) {
 	let i = {
 		coins: t.coins ?? 0,
 		diamonds: t.diamonds ?? 0,
 		chest: t.chest ?? null,
 		chestLost: !1
 	};
-	return e.currencies.coins += i.coins, e.currencies.diamonds += i.diamonds, t.chest && (i.chestLost = !L(e, t.chest, n, r)), i;
+	return e.currencies.coins += i.coins, e.currencies.diamonds += i.diamonds, t.chest && (i.chestLost = !R(e, t.chest, n, r)), i;
 }
 // src/meta/collection.ts
-var z = (e) => ({
+var B = (e) => ({
 	ok: !1,
 	reason: e
 }), dt = { ok: !0 };
 function ft(e, t, n) {
 	let r = x(t), i = e.collection[t];
 	if (!i) return e.collection[t] = {
-		level: j.characters.startLevel,
+		level: M.characters.startLevel,
 		xp: 0,
 		stars: 1,
 		fragments: 0,
@@ -47703,7 +47742,7 @@ function ft(e, t, n) {
 		isNew: !0,
 		fragments: 0
 	};
-	let a = j.characters.fragmentsPerDuplicate[r.rarity];
+	let a = M.characters.fragmentsPerDuplicate[r.rarity];
 	return i.fragments += a, i.copies++, {
 		id: t,
 		isNew: !1,
@@ -47711,13 +47750,13 @@ function ft(e, t, n) {
 	};
 }
 function pt(e) {
-	return e.stars >= 5 ? null : j.characters.starCosts[e.stars - 1] ?? null;
+	return e.stars >= 5 ? null : M.characters.starCosts[e.stars - 1] ?? null;
 }
 function mt(e, t) {
 	let n = e.collection[t];
-	if (!n) return z("Você ainda não tem este personagem");
+	if (!n) return B("Você ainda não tem este personagem");
 	let r = pt(n);
-	return r ? n.fragments < r.fragments ? z(`Faltam ${r.fragments - n.fragments} fragmentos`) : e.currencies.coins < r.coins ? z(`Faltam ${r.coins - e.currencies.coins} moedas`) : dt : z("Já está com 5 estrelas!");
+	return r ? n.fragments < r.fragments ? B(`Faltam ${r.fragments - n.fragments} fragmentos`) : e.currencies.coins < r.coins ? B(`Faltam ${r.coins - e.currencies.coins} moedas`) : dt : B("Já está com 5 estrelas!");
 }
 function ht(e, t) {
 	let n = mt(e, t);
@@ -47726,8 +47765,8 @@ function ht(e, t) {
 	return r.fragments -= i.fragments, e.currencies.coins -= i.coins, r.stars++, dt;
 }
 function gt(e, t, n) {
-	if (t < 0 || t >= 5) return z("Vaga inválida");
-	if (!e.collection[n]) return z("Você ainda não tem este personagem");
+	if (t < 0 || t >= 5) return B("Vaga inválida");
+	if (!e.collection[n]) return B("Você ainda não tem este personagem");
 	let r = e.squad, i = r.indexOf(n);
 	return i === t || (i >= 0 && (r[i] = r[t]), r[t] = n), dt;
 }
@@ -47758,7 +47797,7 @@ function vt(e, t) {
 	return `${e}:${t}`;
 }
 function yt(e, t) {
-	let n = _t(e).byElement[t], r = j.album;
+	let n = _t(e).byElement[t], r = M.album;
 	return r.milestones.map((i, a) => {
 		let o = Math.ceil(n.count * i / 100), s = vt(t, i);
 		return {
@@ -47774,15 +47813,15 @@ function yt(e, t) {
 }
 function bt(e, t, n, r) {
 	let i = yt(e, t).find((e) => e.pct === n);
-	return i ? i.claimed ? z("Recompensa já coletada") : i.reached ? (e.album.claimed.push(i.key), {
+	return i ? i.claimed ? B("Recompensa já coletada") : i.reached ? (e.album.claimed.push(i.key), {
 		ok: !0,
-		reward: R(e, i.reward, "album", r)
-	}) : z(`Junte ${i.needed} personagens deste elemento`) : z("Marco inválido");
+		reward: z(e, i.reward, "album", r)
+	}) : B(`Junte ${i.needed} personagens deste elemento`) : B("Marco inválido");
 }
 // src/meta/chests.ts
-var B = Pe, xt = B.rarities;
-Object.keys(B.chests);
-var V = {
+var V = Pe, xt = V.rarities;
+Object.keys(V.chests);
+var H = {
 	comum: 0,
 	raro: 1,
 	epico: 2,
@@ -47790,7 +47829,7 @@ var V = {
 	extremo: 4
 };
 function St(e) {
-	return B.pity.countsFrom.includes(e);
+	return V.pity.countsFrom.includes(e);
 }
 function Ct(e, t) {
 	let n = t.reduce((e, t) => e + Math.round(t * 100), 0), r = e.int(n);
@@ -47801,7 +47840,7 @@ function wt(e, t) {
 	return e.pick(C(t)).id;
 }
 function Tt(e, t, n, r = 1) {
-	let i = B.chests[e], a = [];
+	let i = V.chests[e], a = [];
 	for (let e = 0; e < i.cards; e++) {
 		let e = Ct(t, i.odds);
 		a.push({
@@ -47810,25 +47849,25 @@ function Tt(e, t, n, r = 1) {
 		});
 	}
 	if (St(e)) {
-		let e = () => a.reduce((e, t, n) => V[t.rarity] < V[a[e].rarity] ? n : e, 0);
-		n.sinceExtreme + 1 >= B.pity.extremeEvery && !a.some((e) => e.rarity === "extremo") && (a[e()] = {
+		let e = () => a.reduce((e, t, n) => H[t.rarity] < H[a[e].rarity] ? n : e, 0);
+		n.sinceExtreme + 1 >= V.pity.extremeEvery && !a.some((e) => e.rarity === "extremo") && (a[e()] = {
 			id: wt(t, "extremo"),
 			rarity: "extremo",
 			pity: "extremo"
-		}), n.sinceLegendary + 1 >= B.pity.legendaryEvery && !a.some((e) => V[e.rarity] >= V.lendario) && (a[e()] = {
+		}), n.sinceLegendary + 1 >= V.pity.legendaryEvery && !a.some((e) => H[e.rarity] >= H.lendario) && (a[e()] = {
 			id: wt(t, "lendario"),
 			rarity: "lendario",
 			pity: "lendario"
 		});
 	}
-	a.sort((e, t) => V[e.rarity] - V[t.rarity]);
-	let o = 1 + B.coinsPerAccountLevel * (Math.max(1, r) - 1);
+	a.sort((e, t) => H[e.rarity] - H[t.rarity]);
+	let o = 1 + V.coinsPerAccountLevel * (Math.max(1, r) - 1);
 	return {
 		type: e,
 		cards: a,
 		coins: Math.round(t.range(i.coins[0], i.coins[1]) * o),
 		diamonds: t.range(i.diamonds[0], i.diamonds[1]),
-		best: a.reduce((e, t) => V[t.rarity] > V[e] ? t.rarity : e, "comum")
+		best: a.reduce((e, t) => H[t.rarity] > H[e] ? t.rarity : e, "comum")
 	};
 }
 function Et(e, t, n) {
@@ -47839,16 +47878,16 @@ function Et(e, t, n) {
 	};
 	let i = e.chests.inventory[r];
 	e.chests.inventory.splice(r, 1);
-	let a = Tt(i.type, I(e), e.chests.pity, e.profile.accountLevel), o = a.cards.map((t) => ({
+	let a = Tt(i.type, L(e), e.chests.pity, e.profile.accountLevel), o = a.cards.map((t) => ({
 		...t,
 		...ft(e, t.id, n)
 	}));
 	if (e.currencies.coins += a.coins, e.currencies.diamonds += a.diamonds, St(i.type)) {
-		let t = e.chests.pity, n = o.some((e) => V[e.rarity] >= V.lendario), r = o.some((e) => e.rarity === "extremo");
+		let t = e.chests.pity, n = o.some((e) => H[e.rarity] >= H.lendario), r = o.some((e) => e.rarity === "extremo");
 		t.sinceLegendary = n ? 0 : t.sinceLegendary + 1, t.sinceExtreme = r ? 0 : t.sinceExtreme + 1;
 	}
-	e.chests.openedTotal++, e.stats.chestsOpened++, N(e, "open_chests", 1), e.pass.xp += j.pass.xp.chest;
-	let s = M(e, j.account.xp.chestOpen);
+	e.chests.openedTotal++, e.stats.chestsOpened++, P(e, "open_chests", 1), e.pass.xp += M.pass.xp.chest;
+	let s = N(e, M.account.xp.chestOpen);
 	return {
 		ok: !0,
 		opening: {
@@ -47863,10 +47902,10 @@ function Et(e, t, n) {
 	};
 }
 function Dt(e) {
-	return j.shop.chests.find((t) => t.type === e)?.diamonds ?? null;
+	return M.shop.chests.find((t) => t.type === e)?.diamonds ?? null;
 }
 function Ot(e, t) {
-	let n = B.unlockFeature[t];
+	let n = V.unlockFeature[t];
 	return n && !Le(e, n) ? n : null;
 }
 function kt(e, t, n) {
@@ -47880,7 +47919,7 @@ function kt(e, t, n) {
 	} : e.currencies.diamonds < r ? {
 		ok: !1,
 		reason: `Faltam ${r - e.currencies.diamonds} diamantes`
-	} : L(e, t, "Loja", n) ? (e.currencies.diamonds -= r, {
+	} : R(e, t, "Loja", n) ? (e.currencies.diamonds -= r, {
 		ok: !0,
 		uid: e.chests.inventory[e.chests.inventory.length - 1].uid
 	}) : {
@@ -47936,7 +47975,7 @@ var jt = {
 function Mt(e, t) {
 	return jt[e] === t;
 }
-var H = 300, Nt = {
+var U = 300, Nt = {
 	core: 1400,
 	barrier: 500,
 	cannon: 900,
@@ -47995,7 +48034,7 @@ var H = 300, Nt = {
 	destroyedRefs = [];
 	structuresDestroyed = 0;
 	constructor(e) {
-		this.setup = e, this.rng = new D(e.seed), this.botRng = [new D(k(e.seed, 101)), new D(k(e.seed, 202))], this.teams = [this.makeTeam(0), this.makeTeam(1)];
+		this.setup = e, this.rng = new O(e.seed), this.botRng = [new O(A(e.seed, 101)), new O(A(e.seed, 202))], this.teams = [this.makeTeam(0), this.makeTeam(1)];
 		for (let t of [0, 1]) for (let n of e.teams[t].structures) {
 			let e = {
 				id: this.nextId++,
@@ -48199,10 +48238,10 @@ var H = 300, Nt = {
 		for (let t = e.length - 1; t >= 0; t--) e[t].ticks--, e[t].ticks <= 0 && e.splice(t, 1);
 	}
 	gapUnitStruct(e, t) {
-		return Math.max(0, Math.abs(e.x - t.x) - H - t.radius);
+		return Math.max(0, Math.abs(e.x - t.x) - U - t.radius);
 	}
 	gapUnits(e, t) {
-		return Math.max(0, Math.abs(e.x - t.x) - H * 2);
+		return Math.max(0, Math.abs(e.x - t.x) - U * 2);
 	}
 	elementOfEntity(e) {
 		let t = this.unit(e);
@@ -48395,7 +48434,7 @@ var H = 300, Nt = {
 		let r = e.team === 0 ? 1 : -1, i = Math.floor(e.spec.speed * (100 - t) / 100), a = e.x + r * i;
 		for (let t of this.structures) {
 			if (!t.alive || t.team === e.team || !t.revealed || t.spec.kind !== "barrier" && t.spec.kind !== "core" && t.spec.kind !== "gate") continue;
-			let n = t.x - r * (t.radius + H);
+			let n = t.x - r * (t.radius + U);
 			r > 0 && e.x <= n && a > n && (a = n), r < 0 && e.x >= n && a < n && (a = n);
 		}
 		a = Math.max(0, Math.min(this.setup.roadLength, a)), e.moving = a !== e.x, e.x = a;
@@ -48510,7 +48549,7 @@ var H = 300, Nt = {
 				let r = e.x + n * t.radius;
 				for (let t of this.structures) {
 					if (!t.alive || t.team === e.team || !t.revealed) continue;
-					let i = t.x - n * (t.radius + H);
+					let i = t.x - n * (t.radius + U);
 					n > 0 && e.x <= i && r > i && (r = i), n < 0 && e.x >= i && r < i && (r = i);
 				}
 				e.x = Math.max(0, Math.min(this.setup.roadLength, r));
@@ -48559,7 +48598,7 @@ var H = 300, Nt = {
 					let a = (i.x - e.x) * n;
 					a <= 0 || a > t.radius || (!r || i.hp * r.maxHp < r.hp * i.maxHp) && (r = i);
 				}
-				r ? (e.x = r.x - n * (r.radius + H), e.nextHitPct = t.power, a(r.id, 100), e.atkCd = 0) : e.nextHitPct = t.power;
+				r ? (e.x = r.x - n * (r.radius + U), e.nextHitPct = t.power, a(r.id, 100), e.atkCd = 0) : e.nextHitPct = t.power;
 				break;
 			}
 			case "turret": {
@@ -48950,6 +48989,21 @@ var H = 300, Nt = {
 			hash: this.hash()
 		};
 	}
+	resultFor(e) {
+		let t = this.result;
+		if (!t || e === 0) return t;
+		let n = ((e) => e === null ? null : +(e === 0))(t.winner), r = this.destructionOf(0), i = n === 0 ? 1 + +(r >= 50) + +(t.timeLeftTicks >= 1800) : 0;
+		return {
+			...t,
+			winner: n,
+			stars: i,
+			destruction: r,
+			coreDestroyed: !this.coreAlive(0),
+			damageDealt: [t.damageDealt[1], t.damageDealt[0]],
+			abilitiesUsed: [t.abilitiesUsed[1], t.abilitiesUsed[0]],
+			ultimatesUsed: [t.ultimatesUsed[1], t.ultimatesUsed[0]]
+		};
+	}
 	hash() {
 		let e = 2166136261, t = (t) => {
 			e ^= t & 65535, e = Math.imul(e, 16777619) >>> 0, e ^= t >>> 16 & 65535, e = Math.imul(e, 16777619) >>> 0;
@@ -49006,14 +49060,14 @@ function Ut(e) {
 		m: e.meta
 	}));
 }
-var U = [
+var Wt = [
 	1,
 	2,
 	3,
 	4,
 	5
-], Wt = 36e5;
-function Gt(e = "medio") {
+], Gt = 36e5;
+function Kt(e = "medio") {
 	return {
 		sound: .8,
 		music: .55,
@@ -49025,7 +49079,7 @@ function Gt(e = "medio") {
 		dayNight: !0
 	};
 }
-function Kt(e) {
+function qt(e) {
 	let t = [
 		[
 			"core",
@@ -49127,16 +49181,16 @@ function Kt(e) {
 			z: r,
 			rot: i
 		};
-		return t === "generator" && (o.lastCollectAt = e - Wt), o;
+		return t === "generator" && (o.lastCollectAt = e - Gt), o;
 	});
 }
-function qt() {
+function Jt() {
 	let e = /* @__PURE__ */ new Uint32Array(1);
 	return crypto.getRandomValues(e), e[0] >>> 0;
 }
-function Jt(e, t, n = "medio") {
-	let r = j.start, i = {};
-	for (let e of U) i[e] = {
+function Yt(e, t, n = "medio") {
+	let r = M.start, i = {};
+	for (let e of Wt) i[e] = {
 		level: 1,
 		xp: 0,
 		stars: 1,
@@ -49148,7 +49202,7 @@ function Jt(e, t, n = "medio") {
 	return {
 		version: 1,
 		profile: {
-			id: crypto.randomUUID ? crypto.randomUUID() : `p-${qt().toString(36)}-${t.toString(36)}`,
+			id: crypto.randomUUID ? crypto.randomUUID() : `p-${Jt().toString(36)}-${t.toString(36)}`,
 			name: a,
 			createdAt: t,
 			accountXp: 0,
@@ -49163,14 +49217,14 @@ function Jt(e, t, n = "medio") {
 		},
 		city: {
 			element: r.element,
-			buildings: Kt(t),
+			buildings: qt(t),
 			storage: [],
 			research: {},
 			researchQueue: null,
 			name: `Ilha de ${a}`
 		},
 		collection: i,
-		squad: [...U],
+		squad: [...Wt],
 		chests: {
 			inventory: r.chests.map((e, n) => ({
 				uid: `welcome-${n}`,
@@ -49221,12 +49275,12 @@ function Jt(e, t, n = "medio") {
 		raids: {
 			pendingChoice: null,
 			shieldUntil: 0,
-			beginnerUntil: t + j.raid.beginnerHours * Wt,
+			beginnerUntil: t + M.raid.beginnerHours * Gt,
 			lastCheckAt: t,
 			log: [],
 			revenge: []
 		},
-		settings: Gt(n),
+		settings: Kt(n),
 		stats: {
 			battles: 0,
 			wins: 0,
@@ -49240,7 +49294,7 @@ function Jt(e, t, n = "medio") {
 			trainingWins: 0
 		},
 		rng: {
-			seed: qt(),
+			seed: Jt(),
 			counter: 0
 		},
 		targets: {
@@ -49251,17 +49305,17 @@ function Jt(e, t, n = "medio") {
 		shop: { dealDay: "" }
 	};
 }
-function Yt(e) {
-	return e.settings ||= Gt(), e.settings = {
-		...Gt(e.settings.graphics),
+function Xt(e) {
+	return e.settings ||= Kt(), e.settings = {
+		...Kt(e.settings.graphics),
 		...e.settings
 	}, e.achievements ??= {}, e.shop ??= { dealDay: "" }, e.version = 1, e;
 }
 // src/meta/defense.ts
-var Xt = 36e5, Zt = -12, Qt = 6;
-function $t(e, t) {
+var Zt = 36e5, Qt = -12, $t = 6;
+function en(e, t) {
 	let n = e.raids;
-	return t < n.beginnerUntil && e.profile.accountLevel < j.raid.beginnerLevel ? {
+	return t < n.beginnerUntil && e.profile.accountLevel < M.raid.beginnerLevel ? {
 		kind: "beginner",
 		until: n.beginnerUntil
 	} : t < n.shieldUntil ? {
@@ -49272,20 +49326,20 @@ function $t(e, t) {
 		until: 0
 	};
 }
-function en(e, t) {
-	return !$t(e, t).kind && !e.raids.pendingChoice;
+function tn(e, t) {
+	return !en(e, t).kind && !e.raids.pendingChoice;
 }
-function tn(e) {
+function nn(e) {
 	return Math.max(0, e.currencies.coins - tt(e));
 }
-function nn(e, t) {
+function rn(e, t) {
 	let n = e.raids, r = t.result.coreDestroyed, i = 0, a = [], o = 0;
 	if (r) {
-		i = tn(e), e.currencies.coins -= i;
+		i = nn(e), e.currencies.coins -= i;
 		let r = new Set(t.result.destroyedRefIds);
 		a = e.city.buildings.filter((e) => r.has(e.id) && e.type !== "core").slice(0, 8).map((e) => e.id);
 		for (let t of e.city.buildings) a.includes(t.id) && (t.ruined = !0, t.upgradeEndsAt = void 0);
-		n.shieldUntil = Math.max(n.shieldUntil, t.at + j.raid.shieldHours * Xt);
+		n.shieldUntil = Math.max(n.shieldUntil, t.at + M.raid.shieldHours * Zt);
 		let s = `v${t.at.toString(36)}${(t.attackerSeed >>> 0).toString(36)}`;
 		n.revenge.unshift({
 			id: s,
@@ -49296,13 +49350,13 @@ function nn(e, t) {
 			raiderId: t.attackerId,
 			coinsLost: i,
 			ruined: a,
-			expiresAt: t.at + j.raid.retakeHours * Xt,
+			expiresAt: t.at + M.raid.retakeHours * Zt,
 			done: !1
 		}), n.revenge = n.revenge.slice(0, 10), n.pendingChoice = {
 			revengeId: s,
 			at: t.at
-		}, o = Zt;
-	} else e.stats.raidsDefended++, o = Qt;
+		}, o = Qt;
+	} else e.stats.raidsDefended++, o = $t;
 	e.profile.trophies = Math.max(0, e.profile.trophies + o);
 	let s = {
 		id: `d${t.at.toString(36)}${(t.attackerSeed >>> 0).toString(36)}`,
@@ -49321,27 +49375,27 @@ function nn(e, t) {
 	};
 	return n.log.unshift(s), n.log = n.log.slice(0, 20), s;
 }
-function rn(e, t) {
+function an(e, t) {
 	return t.filter((t) => !e.teams[t.team].bot);
 }
-function an(e) {
+function on(e) {
 	return Math.max(1, Math.min(10, a(e.city)));
 }
-function on(e) {
-	let t = j.raid.raiderStrengthByCore;
+function sn(e) {
+	let t = M.raid.raiderStrengthByCore;
 	return t[Math.max(0, Math.min(t.length - 1, e - 1))];
 }
-function sn(e, t, n, r = {}) {
-	let i = new D(t), a = r.level ?? an(e), o = Me(t ^ 24301, a), s = Ae(i), c = r.mod ?? on(a) + i.range(-8, 8), { specs: l } = fe(o.squad, o.levels, void 0, {
+function cn(e, t, n, r = {}) {
+	let i = new O(t), a = r.level ?? on(e), o = Me(t ^ 24301, a), s = Ae(i), c = r.mod ?? sn(a) + i.range(-8, 8), { specs: l } = fe(o.squad, o.levels, void 0, {
 		hpPct: c,
 		dmgPct: c
-	}), u = Ce({
+	}), u = Se({
 		seed: t,
 		attacker: {
 			name: s,
 			element: w[i.int(w.length)],
 			squad: l,
-			bot: { skill: r.skill ?? j.raid.raiderSkill }
+			bot: { skill: r.skill ?? M.raid.raiderSkill }
 		},
 		defender: {
 			name: e.profile.name,
@@ -49353,7 +49407,7 @@ function sn(e, t, n, r = {}) {
 		}
 	}), { sim: d, result: f } = zt(u), p = Ut({
 		setup: u,
-		commands: rn(u, d.log),
+		commands: an(u, d.log),
 		hash: f.hash,
 		meta: {
 			attacker: s,
@@ -49361,7 +49415,7 @@ function sn(e, t, n, r = {}) {
 			at: n
 		}
 	});
-	return nn(e, {
+	return rn(e, {
 		attackerName: s,
 		attackerSeed: t,
 		attackerPower: me(o.squad, o.levels),
@@ -49371,8 +49425,8 @@ function sn(e, t, n, r = {}) {
 		at: n
 	});
 }
-function W(e, t, n = 4) {
-	let r = e.raids, i = j.raid.checkEveryHours * Xt;
+function ln(e, t, n = 4) {
+	let r = e.raids, i = M.raid.checkEveryHours * Zt;
 	if (!r.lastCheckAt) return r.lastCheckAt = t, [];
 	let a = [], o = Math.floor((t - r.lastCheckAt) / i);
 	if (o <= 0) return a;
@@ -49380,33 +49434,33 @@ function W(e, t, n = 4) {
 	for (let t = 0; t < o; t++) {
 		r.lastCheckAt += i;
 		let t = r.lastCheckAt;
-		if (!en(e, t)) continue;
-		let n = I(e);
-		n.int(1e3) >= j.raid.raidChance * 1e3 || a.push(sn(e, n.nextU32(), t));
+		if (!tn(e, t)) continue;
+		let n = L(e);
+		n.int(1e3) >= M.raid.raidChance * 1e3 || a.push(cn(e, n.nextU32(), t));
 	}
 	return a;
 }
-function cn(e) {
+function un(e) {
 	return e.raids.pendingChoice ? (e.raids.pendingChoice = null, { ok: !0 }) : {
 		ok: !1,
 		reason: "Nada para escolher"
 	};
 }
-function ln(e, t) {
+function dn(e, t) {
 	let n = e.raids.pendingChoice;
 	if (!n) return {
 		ok: !1,
 		reason: "Nada para escolher"
 	};
 	let r = e.raids.revenge.find((e) => e.id === n.revengeId);
-	r && (r.done = !0), e.raids.pendingChoice = null, e.city.buildings = Kt(t), e.city.storage = [], e.city.researchQueue = null;
-	let i = j.raid.restartPack;
-	return e.currencies.coins += i.coins, L(e, i.chest, "Pacote de Recomeço", t), { ok: !0 };
+	r && (r.done = !0), e.raids.pendingChoice = null, e.city.buildings = qt(t), e.city.storage = [], e.city.researchQueue = null;
+	let i = M.raid.restartPack;
+	return e.currencies.coins += i.coins, R(e, i.chest, "Pacote de Recomeço", t), { ok: !0 };
 }
-function un(e) {
+function fn(e) {
 	for (let t of e.raids.log) t.seen = !0;
 }
-var dn = {
+var pn = {
 	version: 1,
 	milestones: [
 		{
@@ -49524,41 +49578,41 @@ var dn = {
 			}
 		}
 	]
-}, G = 36e5, K = 24 * G, fn = -3 * G, pn = Date.UTC(2026, 0, 5, 3, 0, 0);
-function mn(e) {
-	return e + fn;
-}
-function q(e) {
-	return new Date(mn(e)).toISOString().slice(0, 10);
-}
-function hn(e) {
-	return Math.floor(mn(e) / K);
-}
+}, W = 36e5, G = 24 * W, mn = -3 * W, hn = Date.UTC(2026, 0, 5, 3, 0, 0);
 function gn(e) {
-	let t = new Date(mn(e)), n = (t.getUTCDay() + 6) % 7, r = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - n), i = Date.UTC(new Date(r).getUTCFullYear(), 0, 4), a = i - (new Date(i).getUTCDay() + 6) % 7 * K, o = Math.floor((r - a) / (7 * K)) + 1;
-	return `${new Date(r + 3 * K).getUTCFullYear()}-W${String(o).padStart(2, "0")}`;
+	return e + mn;
 }
-function _n(e, t) {
-	return Math.max(1, Math.floor((e - pn) / (t * K)) + 1);
+function K(e) {
+	return new Date(gn(e)).toISOString().slice(0, 10);
+}
+function _n(e) {
+	return Math.floor(gn(e) / G);
+}
+function vn(e) {
+	let t = new Date(gn(e)), n = (t.getUTCDay() + 6) % 7, r = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - n), i = Date.UTC(new Date(r).getUTCFullYear(), 0, 4), a = i - (new Date(i).getUTCDay() + 6) % 7 * G, o = Math.floor((r - a) / (7 * G)) + 1;
+	return `${new Date(r + 3 * G).getUTCFullYear()}-W${String(o).padStart(2, "0")}`;
+}
+function yn(e, t) {
+	return Math.max(1, Math.floor((e - hn) / (t * G)) + 1);
 }
 // src/meta/retention.ts
-var J = (e) => ({
+var q = (e) => ({
 	ok: !1,
 	reason: e
 });
-function vn(e, t) {
+function bn(e, t) {
 	let n = {
 		newDay: !1,
 		newWeek: !1,
 		newSeason: !1,
 		leagueReward: null
-	}, r = q(t);
+	}, r = K(t);
 	if (e.missions.day !== r) {
-		n.newDay = !0, bn(e, t);
-		let i = e.login.lastDay ? hn(Date.parse(`${e.login.lastDay}T12:00:00Z`) + 3 * G) : -99, a = e.login.lastDay && hn(t) - i === 1;
+		n.newDay = !0, Sn(e, t);
+		let i = e.login.lastDay ? _n(Date.parse(`${e.login.lastDay}T12:00:00Z`) + 3 * W) : -99, a = e.login.lastDay && _n(t) - i === 1;
 		e.login.streak = a ? e.login.streak % 7 + 1 : 1, e.login.lastDay = r, e.login.claimedToday = !1;
 	}
-	let i = gn(t);
+	let i = vn(t);
 	if (e.league.week !== i) {
 		if (n.newWeek = !0, e.league.week) {
 			let t = ze(e.profile.trophies);
@@ -49574,7 +49628,7 @@ function vn(e, t) {
 		wins: 0,
 		claimed: []
 	});
-	let a = _n(t, j.pass.seasonDays);
+	let a = yn(t, M.pass.seasonDays);
 	return e.pass.season !== a && (n.newSeason = e.pass.season !== 0, e.pass = {
 		season: a,
 		xp: 0,
@@ -49583,14 +49637,14 @@ function vn(e, t) {
 		claimedPremium: []
 	}), n;
 }
-function yn(e) {
+function xn(e) {
 	let t = e.profile.accountLevel;
 	return t < 5 ? 0 : t < 12 ? 1 : 2;
 }
-function bn(e, t) {
-	let n = I(e).shuffle(j.missions.pool).slice(0, j.missions.perDay), r = yn(e);
+function Sn(e, t) {
+	let n = L(e).shuffle(M.missions.pool).slice(0, M.missions.perDay), r = xn(e);
 	e.missions = {
-		day: q(t),
+		day: K(t),
 		list: n.map((e) => ({
 			id: e.id,
 			progress: 0,
@@ -49600,119 +49654,119 @@ function bn(e, t) {
 		bonusClaimed: !1
 	};
 }
-function xn(e, t, n) {
+function Cn(e, t, n) {
 	let r = e.missions.list.find((e) => e.id === t);
-	if (!r) return J("Missão não encontrada");
-	if (r.claimed) return J("Já resgatada");
-	if (r.progress < r.goal) return J("Missão ainda não concluída");
-	let i = j.missions.pool.find((e) => e.id === t);
+	if (!r) return q("Missão não encontrada");
+	if (r.claimed) return q("Já resgatada");
+	if (r.progress < r.goal) return q("Missão ainda não concluída");
+	let i = M.missions.pool.find((e) => e.id === t);
 	r.claimed = !0;
-	let a = R(e, i.reward, "Missão diária", n);
-	return e.pass.xp += j.pass.xp.mission, {
+	let a = z(e, i.reward, "Missão diária", n);
+	return e.pass.xp += M.pass.xp.mission, {
 		ok: !0,
 		reward: a,
-		levels: M(e, j.account.xp.mission)
+		levels: N(e, M.account.xp.mission)
 	};
 }
-function Sn(e, t) {
-	return e.missions.bonusClaimed ? J("Bônus já resgatado") : !e.missions.list.length || e.missions.list.some((e) => !e.claimed) ? J("Resgate as 3 missões primeiro") : (e.missions.bonusClaimed = !0, {
+function wn(e, t) {
+	return e.missions.bonusClaimed ? q("Bônus já resgatado") : !e.missions.list.length || e.missions.list.some((e) => !e.claimed) ? q("Resgate as 3 missões primeiro") : (e.missions.bonusClaimed = !0, {
 		ok: !0,
-		reward: R(e, j.missions.allDoneReward, "Missões do dia", t)
+		reward: z(e, M.missions.allDoneReward, "Missões do dia", t)
 	});
 }
-function Cn(e, t) {
-	let n = j.freeChest, r = n.intervalHours * G, i = e.chests.free.lastClaimAt, a = Math.max(0, Math.min(n.maxStored, Math.floor((t - i) / r)));
+function Tn(e, t) {
+	let n = M.freeChest, r = n.intervalHours * W, i = e.chests.free.lastClaimAt, a = Math.max(0, Math.min(n.maxStored, Math.floor((t - i) / r)));
 	return {
 		ready: a,
 		max: n.maxStored,
 		nextAt: a >= n.maxStored ? t : i + (a + 1) * r
 	};
 }
-function wn(e, t) {
-	let n = j.freeChest, r = n.intervalHours * G, i = Cn(e, t);
-	if (i.ready <= 0) return J("O próximo baú grátis ainda não chegou");
-	if (e.chests.inventory.length >= 8) return J("Inventário de baús cheio (máximo 8)");
-	let a = I(e).int(1e3), o = n.type;
-	return a < (n.upgradeChance.ouro ?? 0) * 1e3 ? o = "ouro" : a < ((n.upgradeChance.ouro ?? 0) + (n.upgradeChance.prata ?? 0)) * 1e3 && (o = "prata"), L(e, o, "Baú grátis", t), e.chests.free.lastClaimAt = i.ready >= n.maxStored ? t - (n.maxStored - 1) * r : e.chests.free.lastClaimAt + r, {
+function En(e, t) {
+	let n = M.freeChest, r = n.intervalHours * W, i = Tn(e, t);
+	if (i.ready <= 0) return q("O próximo baú grátis ainda não chegou");
+	if (e.chests.inventory.length >= 8) return q("Inventário de baús cheio (máximo 8)");
+	let a = L(e).int(1e3), o = n.type;
+	return a < (n.upgradeChance.ouro ?? 0) * 1e3 ? o = "ouro" : a < ((n.upgradeChance.ouro ?? 0) + (n.upgradeChance.prata ?? 0)) * 1e3 && (o = "prata"), R(e, o, "Baú grátis", t), e.chests.free.lastClaimAt = i.ready >= n.maxStored ? t - (n.maxStored - 1) * r : e.chests.free.lastClaimAt + r, {
 		ok: !0,
 		type: o,
 		uid: e.chests.inventory[e.chests.inventory.length - 1].uid
 	};
 }
-function Tn(e, t) {
-	if (e.login.lastDay !== q(t) && vn(e, t), e.login.claimedToday) return J("Volte amanhã!");
+function Dn(e, t) {
+	if (e.login.lastDay !== K(t) && bn(e, t), e.login.claimedToday) return q("Volte amanhã!");
 	let n = Math.max(1, Math.min(7, e.login.streak));
 	return e.login.claimedToday = !0, {
 		ok: !0,
 		day: n,
-		reward: R(e, j.login[n - 1], `Login dia ${n}`, t)
+		reward: z(e, M.login[n - 1], `Login dia ${n}`, t)
 	};
 }
-function En(e, t) {
+function On(e, t) {
 	let n = e.league.pending;
-	if (!n) return J("Nenhuma recompensa de liga");
-	let r = j.leagues.find((e) => e.id === n.leagueId) ?? j.leagues[0];
+	if (!n) return q("Nenhuma recompensa de liga");
+	let r = M.leagues.find((e) => e.id === n.leagueId) ?? M.leagues[0];
 	return e.league.pending = null, e.league.rewardsClaimed = [...e.league.rewardsClaimed.slice(-11), n.week], {
 		ok: !0,
 		leagueId: r.id,
-		reward: R(e, r.reward, `Liga ${r.name}`, t)
+		reward: z(e, r.reward, `Liga ${r.name}`, t)
 	};
 }
-var Dn = dn, On = Dn.milestones;
-function kn(e) {
-	let t = gn(e), n = Dn.templates[O(`kaelora:${t}`) % Dn.templates.length];
+var kn = pn, An = kn.milestones;
+function jn(e) {
+	let t = vn(e), n = kn.templates[k(`kaelora:${t}`) % kn.templates.length];
 	return {
 		...n,
 		week: t,
 		rules: { ...n.rules }
 	};
 }
-function An(e, t) {
-	let n = kn(t);
+function Mn(e, t) {
+	let n = jn(t);
 	return {
-		...A((O(`${n.week}:${n.id}`) ^ Math.imul(e.events.wins + 1, 2654435761)) >>> 0, Math.max(1, Math.min(10, a(e.city)))),
+		...j((k(`${n.week}:${n.id}`) ^ Math.imul(e.events.wins + 1, 2654435761)) >>> 0, Math.max(1, Math.min(10, a(e.city)))),
 		ownerName: `Desafio: ${n.title}`
 	};
 }
-function jn(e, t, n) {
-	let r = On.find((e) => e.wins === t);
-	return r ? e.events.claimed.includes(t) ? J("Já resgatado") : e.events.wins < t ? J(`Vença ${t} batalhas do evento`) : (e.events.claimed.push(t), {
+function Nn(e, t, n) {
+	let r = An.find((e) => e.wins === t);
+	return r ? e.events.claimed.includes(t) ? q("Já resgatado") : e.events.wins < t ? q(`Vença ${t} batalhas do evento`) : (e.events.claimed.push(t), {
 		ok: !0,
-		reward: R(e, r.reward, "Evento semanal", n)
-	}) : J("Marco inválido");
+		reward: z(e, r.reward, "Evento semanal", n)
+	}) : q("Marco inválido");
 }
-function Mn(e) {
-	return Math.min(j.pass.tiers, Math.floor(e.pass.xp / j.pass.xpPerTier));
+function Pn(e) {
+	return Math.min(M.pass.tiers, Math.floor(e.pass.xp / M.pass.xpPerTier));
 }
-function Nn(e) {
+function Fn(e) {
 	let t = C("extremo");
 	return t[(Math.imul(e, 7) + 3) % t.length].id;
 }
-function Pn(e, t, n, r) {
-	if (!Number.isInteger(t) || t < 1 || t > j.pass.tiers) return J("Nível do passe inválido");
-	if (Mn(e) < t) return J("Ganhe mais XP do passe");
-	if (n === "premium" && !e.pass.premium) return J("Só com o Passe Premium");
+function In(e, t, n, r) {
+	if (!Number.isInteger(t) || t < 1 || t > M.pass.tiers) return q("Nível do passe inválido");
+	if (Pn(e) < t) return q("Ganhe mais XP do passe");
+	if (n === "premium" && !e.pass.premium) return q("Só com o Passe Premium");
 	let i = n === "free" ? e.pass.claimedFree : e.pass.claimedPremium;
-	if (i.includes(t)) return J("Já resgatado");
-	let a = (n === "free" ? j.pass.free : j.pass.premium)[t - 1];
+	if (i.includes(t)) return q("Já resgatado");
+	let a = (n === "free" ? M.pass.free : M.pass.premium)[t - 1];
 	i.push(t);
-	let o = R(e, a, `Passe nível ${t}`, r);
+	let o = z(e, a, `Passe nível ${t}`, r);
 	return a.character === "season" ? {
 		ok: !0,
 		reward: o,
-		character: ft(e, Nn(e.pass.season), r)
+		character: ft(e, Fn(e.pass.season), r)
 	} : {
 		ok: !0,
 		reward: o
 	};
 }
-function Fn(e) {
-	if (e.pass.premium) return J("Você já tem o Passe Premium");
-	let t = j.pass.premiumCostDiamonds;
-	return e.currencies.diamonds < t ? J(`Faltam ${t - e.currencies.diamonds} diamantes`) : (e.currencies.diamonds -= t, e.pass.premium = !0, { ok: !0 });
+function Ln(e) {
+	if (e.pass.premium) return q("Você já tem o Passe Premium");
+	let t = M.pass.premiumCostDiamonds;
+	return e.currencies.diamonds < t ? q(`Faltam ${t - e.currencies.diamonds} diamantes`) : (e.currencies.diamonds -= t, e.pass.premium = !0, { ok: !0 });
 }
 // src/meta/achievements.ts
-var In = {
+var Rn = {
 	version: 1,
 	list: [
 		{
@@ -49915,11 +49969,11 @@ var In = {
 		}
 	]
 }.list;
-function Ln(e, t) {
+function zn(e, t) {
 	return t === "collection" ? Object.keys(e.collection).length : t === "accountLevel" ? e.profile.accountLevel : t === "bestTrophies" ? e.profile.bestTrophies : e.stats[t] ?? 0;
 }
-function Rn(e, t) {
-	let n = In.find((e) => e.id === t);
+function Bn(e, t) {
+	let n = Rn.find((e) => e.id === t);
 	if (!n) return {
 		ok: !1,
 		reason: "Conquista desconhecida"
@@ -49930,7 +49984,7 @@ function Rn(e, t) {
 		ok: !1,
 		reason: "Conquista completa"
 	};
-	if (Ln(e, n.stat) < n.tiers[r]) return {
+	if (zn(e, n.stat) < n.tiers[r]) return {
 		ok: !1,
 		reason: "Ainda não alcançada"
 	};
@@ -49943,95 +49997,95 @@ function Rn(e, t) {
 	};
 }
 // src/meta/research.ts
-var zn = (e) => ({
+var Vn = (e) => ({
 	ok: !1,
 	reason: e
 });
-function Bn(e) {
+function Hn(e) {
 	return ae.find((t) => t.id === e);
 }
-function Vn(e) {
+function Un(e) {
 	let t = 0;
 	for (let r of e.city.buildings) r.type === "lab" && !r.ruined && !r.upgradeEndsAt && (t = Math.max(t, n("lab", r.level).maxResearch ?? 0));
 	return t;
 }
-function Hn(e, t) {
+function Wn(e, t) {
 	return e.city.research[t] ?? 0;
 }
-function Un(e, t) {
-	let n = Bn(t);
+function Gn(e, t) {
+	let n = Hn(t);
 	if (!n) return "Pesquisa desconhecida";
-	let r = Vn(e);
+	let r = Un(e);
 	if (r === 0) return "Construa um Laboratório";
 	if (e.city.researchQueue) return "O Laboratório já está pesquisando";
-	let i = Hn(e, t);
+	let i = Wn(e, t);
 	return i >= n.maxLevel ? "Pesquisa no máximo" : i >= r ? "Melhore o Laboratório para continuar" : e.currencies.coins < n.costs[i] ? `Faltam ${n.costs[i] - e.currencies.coins} moedas` : null;
 }
-function Wn(e, t, n) {
-	let r = Un(e, t);
-	if (r) return zn(r);
-	let i = Bn(t), a = Hn(e, t);
+function Kn(e, t, n) {
+	let r = Gn(e, t);
+	if (r) return Vn(r);
+	let i = Hn(t), a = Wn(e, t);
 	e.currencies.coins -= i.costs[a];
 	let o = i.times[a] ?? 0;
 	return e.city.researchQueue = {
 		id: t,
 		endsAt: n + o * 1e3
-	}, o <= 0 && Gn(e, n), { ok: !0 };
-}
-function Gn(e, t) {
-	let n = e.city.researchQueue;
-	return !n || n.endsAt > t ? null : (e.city.research[n.id] = (e.city.research[n.id] ?? 0) + 1, e.city.researchQueue = null, M(e, j.account.xp.upgrade), n.id);
-}
-function Kn(e, t) {
-	let n = e.city.researchQueue;
-	return n ? Re(Math.max(0, (n.endsAt - t) / 1e3)) : 0;
+	}, o <= 0 && qn(e, n), { ok: !0 };
 }
 function qn(e, t) {
 	let n = e.city.researchQueue;
-	if (!n) return zn("Nada para acelerar");
-	let r = Kn(e, t);
-	return e.currencies.diamonds < r ? zn("Diamantes insuficientes") : (e.currencies.diamonds -= r, n.endsAt = t, Gn(e, t), { ok: !0 });
+	return !n || n.endsAt > t ? null : (e.city.research[n.id] = (e.city.research[n.id] ?? 0) + 1, e.city.researchQueue = null, N(e, M.account.xp.upgrade), n.id);
+}
+function Jn(e, t) {
+	let n = e.city.researchQueue;
+	return n ? Re(Math.max(0, (n.endsAt - t) / 1e3)) : 0;
+}
+function Yn(e, t) {
+	let n = e.city.researchQueue;
+	if (!n) return Vn("Nada para acelerar");
+	let r = Jn(e, t);
+	return e.currencies.diamonds < r ? Vn("Diamantes insuficientes") : (e.currencies.diamonds -= r, n.endsAt = t, qn(e, t), { ok: !0 });
 }
 // src/meta/shop.ts
-var Jn = [...j.shop.chests.filter((e) => e.type !== "extremo").map((e) => ({
+var Xn = [...M.shop.chests.filter((e) => e.type !== "extremo").map((e) => ({
 	title: "Baú em promoção",
 	chest: e.type
-})), ...j.shop.coins.map((e) => ({
+})), ...M.shop.coins.map((e) => ({
 	title: "Saco de moedas turbinado",
 	coins: Math.round(e.coins * 1.2)
 }))];
-function Yn(e) {
-	let t = q(e), n = O(`deal:${t}`) % Jn.length, r = Jn[n], i = r.chest ? j.shop.chests.find((e) => e.type === r.chest).diamonds : j.shop.coins.find((e) => Math.round(e.coins * 1.2) === r.coins).diamonds;
+function Zn(e) {
+	let t = K(e), n = k(`deal:${t}`) % Xn.length, r = Xn[n], i = r.chest ? M.shop.chests.find((e) => e.type === r.chest).diamonds : M.shop.coins.find((e) => Math.round(e.coins * 1.2) === r.coins).diamonds;
 	return {
 		...r,
 		id: `${t}:${n}`,
 		full: i,
-		price: Math.max(1, Math.round(i * (1 - j.shop.dailyDealDiscount)))
+		price: Math.max(1, Math.round(i * (1 - M.shop.dailyDealDiscount)))
 	};
 }
-function Xn(e, t) {
-	return e.shop?.dealDay === q(t);
+function Qn(e, t) {
+	return e.shop?.dealDay === K(t);
 }
-function Zn(e, t) {
-	if (Xn(e, t)) return {
+function $n(e, t) {
+	if (Qn(e, t)) return {
 		ok: !1,
 		reason: "Você já levou a oferta de hoje"
 	};
-	let n = Yn(t);
+	let n = Zn(t);
 	return e.currencies.diamonds < n.price ? {
 		ok: !1,
 		reason: `Faltam ${n.price - e.currencies.diamonds} diamantes`
-	} : n.chest && !L(e, n.chest, "Oferta do dia", t) ? {
+	} : n.chest && !R(e, n.chest, "Oferta do dia", t) ? {
 		ok: !1,
 		reason: "Inventário de baús cheio (máximo 8)"
-	} : (e.currencies.diamonds -= n.price, n.coins && (e.currencies.coins += n.coins), e.shop = { dealDay: q(t) }, {
+	} : (e.currencies.diamonds -= n.price, n.coins && (e.currencies.coins += n.coins), e.shop = { dealDay: K(t) }, {
 		ok: !0,
 		chest: n.chest,
 		coins: n.coins
 	});
 }
-function Qn(e, t) {
-	let n = j.shop.coins[t];
+function er(e, t) {
+	let n = M.shop.coins[t];
 	return n ? e.currencies.diamonds < n.diamonds ? {
 		ok: !1,
 		reason: `Faltam ${n.diamonds - e.currencies.diamonds} diamantes`
@@ -50044,10 +50098,10 @@ function Qn(e, t) {
 	};
 }
 // src/meta/actions.ts
-var Y = (e) => ({
+var J = (e) => ({
 	ok: !1,
 	reason: e
-}), $n = {
+}), tr = {
 	build: (e, t, n) => He(e, t.type, t.x, t.z, t.rot, n.now),
 	place: (e, t, n) => Ge(e, t.storageId, t.x, t.z, t.rot, n.now),
 	move: (e, t) => Ue(e, t.id, t.x, t.z, t.rot),
@@ -50057,7 +50111,7 @@ var Y = (e) => ({
 	speedup: (e, t, n) => Qe(e, t.id, n.now),
 	collect: (e, t, n) => et(e, t.id, n.now),
 	repair: (e, t) => rt(e, t.id),
-	element: (e, t) => w.includes(t.element) ? (e.city.element = t.element, { ok: !0 }) : Y("Elemento inválido"),
+	element: (e, t) => w.includes(t.element) ? (e.city.element = t.element, { ok: !0 }) : J("Elemento inválido"),
 	starUp: (e, t) => ht(e, t.id),
 	squadSlot: (e, t) => gt(e, t.slot, t.id),
 	albumClaim: (e, t, n) => bt(e, t.element, t.pct, n.now),
@@ -50072,9 +50126,9 @@ var Y = (e) => ({
 	targets: (e, t, n) => ot(e, n.now, !!t.force),
 	refreshTargets: (e, t, n) => {
 		let r = st(e);
-		return e.currencies.coins < r ? Y("Moedas insuficientes") : (e.currencies.coins -= r, ot(e, n.now, !0), { ok: !0 });
+		return e.currencies.coins < r ? J("Moedas insuficientes") : (e.currencies.coins -= r, ot(e, n.now, !0), { ok: !0 });
 	},
-	battleSeed: (e, t) => I(e).nextU32(),
+	battleSeed: (e, t) => L(e).nextU32(),
 	battleEnd: (e, t, n) => {
 		let r = ut(e, {
 			kind: t.kind,
@@ -50086,34 +50140,34 @@ var Y = (e) => ({
 		});
 		return t.target && t.kind === "raid" && ct(e, t.target.seed), e.progression.tutorialStep < 3 && e.progression.tutorialStep++, r;
 	},
-	offlineRaids: (e, t, n) => W(e, n.now),
-	defenseSeen: (e, t) => (un(e), !0),
-	raidChoice: (e, t, n) => t.choice === "rebuild" ? ln(e, n.now) : cn(e),
-	rollover: (e, t, n) => vn(e, n.now),
-	claimMission: (e, t, n) => xn(e, t.id, n.now),
-	claimMissionBonus: (e, t, n) => Sn(e, n.now),
-	claimLogin: (e, t, n) => Tn(e, n.now),
-	claimFreeChest: (e, t, n) => wn(e, n.now),
-	claimLeague: (e, t, n) => En(e, n.now),
-	claimPass: (e, t, n) => Pn(e, t.tier, t.track === "premium" ? "premium" : "free", n.now),
-	buyPremium: (e, t) => Fn(e),
-	claimEvent: (e, t, n) => jn(e, t.wins, n.now),
-	startResearch: (e, t, n) => Wn(e, t.id, n.now),
-	speedupResearch: (e, t, n) => qn(e, n.now),
-	finishResearch: (e, t, n) => Gn(e, n.now),
-	buyCoins: (e, t) => Qn(e, t.index),
-	buyDeal: (e, t, n) => Zn(e, n.now),
-	claimAchievement: (e, t) => Rn(e, t.id),
+	offlineRaids: (e, t, n) => ln(e, n.now),
+	defenseSeen: (e, t) => (fn(e), !0),
+	raidChoice: (e, t, n) => t.choice === "rebuild" ? dn(e, n.now) : un(e),
+	rollover: (e, t, n) => bn(e, n.now),
+	claimMission: (e, t, n) => Cn(e, t.id, n.now),
+	claimMissionBonus: (e, t, n) => wn(e, n.now),
+	claimLogin: (e, t, n) => Dn(e, n.now),
+	claimFreeChest: (e, t, n) => En(e, n.now),
+	claimLeague: (e, t, n) => On(e, n.now),
+	claimPass: (e, t, n) => In(e, t.tier, t.track === "premium" ? "premium" : "free", n.now),
+	buyPremium: (e, t) => Ln(e),
+	claimEvent: (e, t, n) => Nn(e, t.wins, n.now),
+	startResearch: (e, t, n) => Kn(e, t.id, n.now),
+	speedupResearch: (e, t, n) => Yn(e, n.now),
+	finishResearch: (e, t, n) => qn(e, n.now),
+	buyCoins: (e, t) => er(e, t.index),
+	buyDeal: (e, t, n) => $n(e, n.now),
+	claimAchievement: (e, t) => Bn(e, t.id),
 	rename: (e, t) => {
 		let n = String(t.name ?? "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, 16);
-		return n.length < 2 ? Y("Nome muito curto") : (e.profile.name = n, { ok: !0 });
+		return n.length < 2 ? J("Nome muito curto") : (e.profile.name = n, { ok: !0 });
 	},
-	avatar: (e, t) => e.collection[t.id] ? (e.profile.avatar = t.id, { ok: !0 }) : Y("Escolha um personagem da sua coleção"),
+	avatar: (e, t) => e.collection[t.id] ? (e.profile.avatar = t.id, { ok: !0 }) : J("Escolha um personagem da sua coleção"),
 	cityName: (e, t) => {
 		let n = String(t.name ?? "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, 24);
-		return n.length < 2 ? Y("Nome muito curto") : (e.city.name = n, { ok: !0 });
+		return n.length < 2 ? J("Nome muito curto") : (e.city.name = n, { ok: !0 });
 	}
-}, er = {
+}, nr = {
 	album: "albumClaim",
 	mission: "claimMission",
 	missionBonus: "claimMissionBonus",
@@ -50124,11 +50178,11 @@ var Y = (e) => ({
 	event: "claimEvent",
 	achievement: "claimAchievement"
 };
-function tr(e, t, n, r) {
-	let i = $n[t];
+function rr(e, t, n, r) {
+	let i = tr[t];
 	return i(e, n, r);
 }
-var nr = /* @__PURE__ */ new Set([
+var ir = /* @__PURE__ */ new Set([
 	.../* @__PURE__ */ new Set([
 		"build",
 		"place",
@@ -50155,21 +50209,56 @@ var nr = /* @__PURE__ */ new Set([
 	"buyChest",
 	"raidChoice",
 	"buyDeal"
-]), rr = e.training.difficulties;
-function ir(e, t) {
-	let n = rr.find((e) => e.id === t) ?? rr[1], r = a(e.city);
+]), ar = e.training.difficulties;
+function or(e, t) {
+	let n = ar.find((e) => e.id === t) ?? ar[1], r = a(e.city);
 	return Math.max(1, Math.min(10, Math.round(r * n.power + (n.power - 1) * 1.5)));
 }
-function ar(e, t, n) {
-	let r = rr.find((e) => e.id === t) ?? rr[1];
+function sr(e, t, n) {
+	let r = ar.find((e) => e.id === t) ?? ar[1];
 	return {
-		...A(n, ir(e, t)),
+		...j(n, or(e, t)),
 		ownerName: `Cidade-teste ${r.name}`,
 		name: "Campo de Treino"
 	};
 }
+// src/content/duelSetup.ts
+function cr(e, t) {
+	let n = {};
+	for (let t of e.squad) n[t] = {
+		level: e.collection[t]?.level ?? 1,
+		stars: e.collection[t]?.stars ?? 1
+	};
+	return {
+		id: t,
+		name: e.profile.name,
+		element: e.city.element,
+		squad: [...e.squad],
+		levels: n,
+		research: { ...e.city.research },
+		coreLevel: a(e.city),
+		trophies: e.profile.trophies
+	};
+}
+function lr(e) {
+	return Math.max(1, Math.min(10, Math.round((e.host.coreLevel + e.guest.coreLevel) / 2)));
+}
+function ur(e) {
+	let t = (e) => ({
+		name: e.name,
+		element: e.element,
+		squad: fe(e.squad, e.levels, e.research).specs,
+		research: e.research
+	});
+	return Ce({
+		seed: e.seed,
+		level: lr(e),
+		a: t(e.host),
+		b: t(e.guest)
+	});
+}
 // src/server/types.ts
-var or = class extends Error {
+var Y = class extends Error {
 	constructor() {
 		super("conflito de versão");
 	}
@@ -50178,7 +50267,7 @@ var or = class extends Error {
 	constructor(e, t = 400) {
 		super(e), this.status = t;
 	}
-}, sr = 216e5, cr = 12e5, lr = 1, ur = 5e3, dr = /* @__PURE__ */ new Set([
+}, dr = 216e5, fr = 12e5, pr = 1, mr = 5e3, hr = /* @__PURE__ */ new Set([
 	"madeira",
 	"prata",
 	"ouro",
@@ -50212,7 +50301,7 @@ function Q(e) {
 	]) if (t in e && typeof e[t] == "number" && !Number.isInteger(e[t])) throw new X("Número inválido");
 	return e;
 }
-var fr = class {
+var gr = class {
 	db;
 	clock;
 	constructor(e, t = () => Date.now()) {
@@ -50223,7 +50312,7 @@ var fr = class {
 			let n = await this.db.load(e);
 			if (!n) throw new X("Jogador não encontrado", 404);
 			let r = n.version, i = this.clock();
-			Xe(n.save, i + ur), Gn(n.save, i + ur), vn(n.save, i);
+			Xe(n.save, i + mr), qn(n.save, i + mr), bn(n.save, i);
 			let a = t(n, i);
 			n.version = r + 1;
 			try {
@@ -50232,7 +50321,7 @@ var fr = class {
 					out: a
 				};
 			} catch (e) {
-				if (!(e instanceof or)) throw e;
+				if (!(e instanceof Y)) throw e;
 			}
 		}
 		throw new X("Servidor ocupado, tente de novo", 409);
@@ -50240,13 +50329,13 @@ var fr = class {
 	async bootstrap(e, t = {}) {
 		if (!await this.db.load(e)) {
 			let n = this.clock(), r, i = !1;
-			t.localSave ? (r = gr(t.localSave, n), i = !0) : (r = Jt((t.name ?? "Jogador").slice(0, 16), n), t.element && w.includes(t.element) && (r.city.element = t.element)), r.profile.id = e, r.rng = {
+			t.localSave ? (r = br(t.localSave, n), i = !0) : (r = Yt((t.name ?? "Jogador").slice(0, 16), n), t.element && w.includes(t.element) && (r.city.element = t.element)), r.profile.id = e, r.rng = {
 				seed: this.db.randomSeed(),
 				counter: 0
 			};
 			let a = {
 				save: r,
-				version: lr,
+				version: pr,
 				targets: [],
 				activeBattle: null,
 				importedAt: i ? n : void 0
@@ -50258,7 +50347,7 @@ var fr = class {
 				defenses: []
 			};
 		}
-		let { st: n, out: r } = await this.withState(e, (e, t) => W(e.save, t));
+		let { st: n, out: r } = await this.withState(e, (e, t) => ln(e.save, t));
 		return {
 			save: Z(n.save),
 			created: !1,
@@ -50267,15 +50356,15 @@ var fr = class {
 		};
 	}
 	async sync(e) {
-		let { st: t, out: n } = await this.withState(e, (e, t) => W(e.save, t));
+		let { st: t, out: n } = await this.withState(e, (e, t) => ln(e.save, t));
 		return {
 			save: Z(t.save),
 			defenses: n
 		};
 	}
 	async action(e, t, n) {
-		if (!nr.has(t)) throw new X(`Ação não permitida: ${String(t)}`, 403);
-		let r = Q(n), { st: i, out: a } = await this.withState(e, (e, n) => tr(e.save, t, r, { now: n }));
+		if (!ir.has(t)) throw new X(`Ação não permitida: ${String(t)}`, 403);
+		let r = Q(n), { st: i, out: a } = await this.withState(e, (e, n) => rr(e.save, t, r, { now: n }));
 		return {
 			result: a,
 			save: Z(i.save)
@@ -50291,9 +50380,9 @@ var fr = class {
 		};
 	}
 	async claimReward(e, t) {
-		let { kind: n, ...r } = Q(t), i = er[n];
+		let { kind: n, ...r } = Q(t), i = nr[n];
 		if (!i) throw new X("Recompensa desconhecida");
-		let { st: a, out: o } = await this.withState(e, (e, t) => tr(e.save, i, r, { now: t }));
+		let { st: a, out: o } = await this.withState(e, (e, t) => rr(e.save, i, r, { now: t }));
 		return {
 			result: o,
 			save: Z(a.save)
@@ -50303,8 +50392,8 @@ var fr = class {
 		let { force: n } = Q(t), r = await this.db.load(e);
 		if (!r) throw new X("Jogador não encontrado", 404);
 		let i = this.clock();
-		if (!n && r.targets.length >= 3 && i - r.save.targets.refreshedAt < sr) return {
-			targets: r.targets.map(pr),
+		if (!n && r.targets.length >= 3 && i - r.save.targets.refreshedAt < dr) return {
+			targets: r.targets.map(_r),
 			save: Z(r.save)
 		};
 		let o = await this.db.candidates(e, {
@@ -50317,13 +50406,13 @@ var fr = class {
 				if (e.save.currencies.coins < t) throw new X("Moedas insuficientes");
 				e.save.currencies.coins -= t;
 			}
-			let r = [], i = I(e.save);
+			let r = [], i = L(e.save);
 			for (let e of i.shuffle(o)) {
 				if (r.length >= 2) break;
-				en(e.state.save, t) && r.push({
+				tn(e.state.save, t) && r.push({
 					key: `p:${e.userId}`,
 					ownerId: e.userId,
-					city: mr(e.userId, e.state.save)
+					city: vr(e.userId, e.state.save)
 				});
 			}
 			let s = a(e.save.city);
@@ -50332,7 +50421,7 @@ var fr = class {
 				r.push({
 					key: `b:${t}`,
 					ownerId: null,
-					city: A(t, n)
+					city: j(t, n)
 				});
 			}
 			return e.targets = r, e.save.targets = {
@@ -50341,7 +50430,7 @@ var fr = class {
 			}, r;
 		});
 		return {
-			targets: s.targets.map(pr),
+			targets: s.targets.map(_r),
 			save: Z(s.save)
 		};
 	}
@@ -50353,13 +50442,13 @@ var fr = class {
 			if (r.raiderId) {
 				let e = await this.db.load(r.raiderId);
 				e && (i = {
-					city: mr(r.raiderId, e.save),
+					city: vr(r.raiderId, e.save),
 					ownerId: r.raiderId
 				});
 			}
 			i ||= {
 				city: {
-					...A(r.raiderSeed, r.raiderLevel ?? a(t.save.city)),
+					...j(r.raiderSeed, r.raiderLevel ?? a(t.save.city)),
 					ownerName: r.raiderName
 				},
 				ownerId: null
@@ -50367,8 +50456,8 @@ var fr = class {
 		}
 		let { st: o } = await this.withState(e, (e, t) => {
 			let a, o = null, s;
-			if (r === "event") a = An(e.save, t), s = kn(t).rules;
-			else if (r === "training") a = ar(e.save, String(n.difficulty ?? "normal"), I(e.save).nextU32());
+			if (r === "event") a = Mn(e.save, t), s = jn(t).rules;
+			else if (r === "training") a = sr(e.save, String(n.difficulty ?? "normal"), L(e.save).nextU32());
 			else if (r === "revenge") a = i.city, o = i.ownerId;
 			else {
 				let t = e.targets.find((e) => e.key === n.targetKey);
@@ -50376,7 +50465,7 @@ var fr = class {
 				a = t.city, o = t.ownerId;
 			}
 			let c = {
-				seed: I(e.save).nextU32(),
+				seed: L(e.save).nextU32(),
 				kind: r,
 				target: a,
 				targetKey: n.targetKey,
@@ -50396,10 +50485,10 @@ var fr = class {
 		};
 	}
 	async validateBattle(e, t) {
-		let n = t, r = hr(n?.commands), i = typeof n?.hash == "number" ? n.hash : 0, o = null, s = null, { st: c, out: l } = await this.withState(e, (t, n) => {
+		let n = t, r = yr(n?.commands), i = typeof n?.hash == "number" ? n.hash : 0, o = null, s = null, { st: c, out: l } = await this.withState(e, (t, n) => {
 			let c = t.activeBattle;
 			if (!c) throw new X("Nenhuma batalha em andamento");
-			if (n - c.startedAt > cr) throw t.activeBattle = null, new X("Batalha expirada");
+			if (n - c.startedAt > fr) throw t.activeBattle = null, new X("Batalha expirada");
 			let l = we(t.save, c.target, c.seed, c.event), { sim: u, result: d } = zt(l, r), f = ge(t.save, c.event?.element).ids, p = ut(t.save, {
 				kind: c.kind,
 				target: c.target,
@@ -50409,7 +50498,7 @@ var fr = class {
 				revengeId: c.revengeId
 			});
 			c.kind === "raid" && c.targetKey && (t.targets = t.targets.filter((e) => e.key !== c.targetKey)), t.save.progression.tutorialStep < 3 && t.save.progression.tutorialStep++, t.activeBattle = null;
-			let m = rn(l, u.log);
+			let m = an(l, u.log);
 			if (s = {
 				id: `${e}:${n}`,
 				attackerId: e,
@@ -50436,7 +50525,7 @@ var fr = class {
 					ownerId: c.ownerId,
 					entry: {
 						attackerName: t.save.profile.name,
-						attackerSeed: O(e),
+						attackerSeed: k(e),
 						attackerPower: me(t.save.squad, t.save.collection),
 						attackerLevel: a(t.save.city),
 						attackerId: e,
@@ -50454,15 +50543,104 @@ var fr = class {
 		});
 		s && await this.db.recordBattle(s);
 		let u = o;
-		return u && await this.withState(u.ownerId, (e) => nn(e.save, u.entry)).catch(() => void 0), {
+		return u && await this.withState(u.ownerId, (e) => rn(e.save, u.entry)).catch(() => void 0), {
 			...l,
 			save: Z(c.save)
 		};
 	}
+	async submitDuel(e, t) {
+		let n = t, r = n?.start;
+		if (!r || typeof r.matchId != "string" || r.matchId.length > 80 || !r.host || !r.guest) throw new X("Duelo inválido");
+		let i = r.host.id === e ? 0 : r.guest.id === e ? 1 : null;
+		if (i === null) throw new X("Você não está neste duelo", 403);
+		if (r.host.id === r.guest.id) throw new X("Duelo inválido");
+		let a = await this.db.load(e);
+		if (!a) throw new X("Jogador não encontrado", 404);
+		let o = i === 0 ? r.host : r.guest, s = cr(a.save, e);
+		if (!(JSON.stringify(s.squad) === JSON.stringify(o.squad) && s.squad.every((e) => s.levels[e].level === o.levels?.[e]?.level && s.levels[e].stars === o.levels?.[e]?.stars))) throw new X("Seu esquadrão não confere com o servidor");
+		let c = yr(n.commands, !0), l = typeof n.hash == "number" ? n.hash : 0, u = this.clock();
+		for (let t = 0; t < 4; t++) {
+			let t = await this.db.loadDuel(r.matchId);
+			if (t?.resolved) return {
+				status: "resolved",
+				outcome: t.outcome?.[e] ?? null
+			};
+			let n = t ?? {
+				matchId: r.matchId,
+				start: r,
+				submissions: {},
+				resolved: !1,
+				version: 0
+			};
+			if (JSON.stringify(n.start) !== JSON.stringify(r)) throw new X("Combinado do duelo diferente do adversário");
+			n.submissions[e] = {
+				commands: c,
+				hash: l,
+				at: u
+			};
+			let i = [r.host.id, r.guest.id].every((e) => n.submissions[e]), a = t ? t.version : null;
+			n.resolved = i, n.version = (a ?? 0) + 1;
+			try {
+				await this.db.storeDuel(n, a);
+			} catch (e) {
+				if (e instanceof Y) continue;
+				throw e;
+			}
+			if (!i) return {
+				status: "waiting",
+				outcome: null
+			};
+			let o = await this.resolveDuel(n);
+			for (let e = 0; e < 4; e++) {
+				let e = await this.db.loadDuel(r.matchId);
+				if (!e) break;
+				e.outcome = o;
+				let t = e.version;
+				e.version = t + 1;
+				try {
+					await this.db.storeDuel(e, t);
+					break;
+				} catch (e) {
+					if (!(e instanceof Y)) throw e;
+				}
+			}
+			return {
+				status: "resolved",
+				outcome: o[e] ?? null
+			};
+		}
+		throw new X("Servidor ocupado, tente de novo", 409);
+	}
+	async resolveDuel(e) {
+		let t = e.start, n = [t.host.id, t.guest.id], r = {}, [i, a] = n.map((t) => e.submissions[t]);
+		if (JSON.stringify(i.commands) !== JSON.stringify(a.commands)) {
+			for (let e of n) r[e] = { error: "As jogadas dos dois aparelhos não batem" };
+			return r;
+		}
+		let { sim: o } = zt(ur(t), i.commands);
+		for (let [e, n] of [[0, t.host.id], [1, t.guest.id]]) {
+			let i = o.resultFor(e), a = e === 0 ? t.guest : t.host, { out: s } = await this.withState(n, (e, t) => ut(e.save, {
+				kind: "duel",
+				target: {
+					loot: 0,
+					coreLevel: a.coreLevel,
+					trophies: a.trophies
+				},
+				result: i,
+				squad: [...e.save.squad],
+				now: t
+			}));
+			r[n] = {
+				rewards: s,
+				won: i.winner === 0
+			};
+		}
+		return r;
+	}
 	async applyRaid(e, t) {
 		let n = Q(t), { st: r, out: i } = await this.withState(e, (e, t) => ({
-			defenses: W(e.save, t),
-			choice: n.choice === "rebuild" || n.choice === "retake" ? tr(e.save, "raidChoice", { choice: n.choice }, { now: t }) : null
+			defenses: ln(e.save, t),
+			choice: n.choice === "rebuild" || n.choice === "retake" ? rr(e.save, "raidChoice", { choice: n.choice }, { now: t }) : null
 		}));
 		return {
 			...i,
@@ -50470,16 +50648,16 @@ var fr = class {
 		};
 	}
 };
-function pr(e) {
+function _r(e) {
 	return {
 		key: e.key,
 		isPlayer: !!e.ownerId,
 		city: e.city
 	};
 }
-function mr(e, t) {
+function vr(e, t) {
 	return {
-		seed: O(e),
+		seed: k(e),
 		name: t.city.name,
 		ownerName: t.profile.name,
 		element: t.city.element,
@@ -50495,49 +50673,52 @@ function mr(e, t) {
 			level: t.collection[e]?.level ?? 1,
 			stars: t.collection[e]?.stars ?? 1
 		}])),
-		loot: tn(t)
+		loot: nn(t)
 	};
 }
-function hr(e) {
+function yr(e, t = !1) {
 	if (!Array.isArray(e)) return [];
-	let t = [];
-	for (let n of e.slice(0, 2e3)) {
-		if (!n || typeof n != "object") continue;
-		let e = Number(n.tick), r = n.cmd;
-		if (!(!Number.isInteger(e) || e < 0 || e > 18e3 || !r || typeof r.t != "string")) {
-			if (r.t === "deploy" || r.t === "ability") {
-				if (!Number.isInteger(r.slot) || r.slot < 0 || r.slot > 4) continue;
-				t.push({
-					tick: e,
-					team: 0,
-					cmd: {
-						t: r.t,
-						slot: r.slot
-					}
-				});
-			} else (r.t === "ultimate" || r.t === "surrender") && t.push({
+	let n = [];
+	for (let r of e.slice(0, 2e3)) {
+		if (!r || typeof r != "object") continue;
+		let e = Number(r.tick), i = r.cmd;
+		if (!Number.isInteger(e) || e < 0 || e > 18e3 || !i || typeof i.t != "string") continue;
+		let a = t && r.team === 1 ? 1 : 0;
+		if (i.t === "deploy" || i.t === "ability") {
+			if (!Number.isInteger(i.slot) || i.slot < 0 || i.slot > 4) continue;
+			n.push({
 				tick: e,
-				team: 0,
-				cmd: { t: r.t }
+				team: a,
+				cmd: {
+					t: i.t,
+					slot: i.slot
+				}
 			});
-		}
+		} else (i.t === "ultimate" || i.t === "surrender") && n.push({
+			tick: e,
+			team: a,
+			cmd: { t: i.t }
+		});
 	}
-	return t.sort((e, t) => e.tick - t.tick);
+	return n.map((e, t) => ({
+		c: e,
+		i: t
+	})).sort((e, t) => e.c.tick - t.c.tick || e.c.team - t.c.team || e.i - t.i).map((e) => e.c);
 }
-function gr(e, t) {
-	let n = Jt(String(e?.profile?.name ?? "Jogador").slice(0, 16), t), r;
+function br(e, t) {
+	let n = Yt(String(e?.profile?.name ?? "Jogador").slice(0, 16), t), r;
 	try {
-		r = Yt(structuredClone(e));
+		r = Xt(structuredClone(e));
 	} catch {
 		return n;
 	}
-	let i = $(r.profile?.accountLevel, 1, j.account.maxLevel, 1), a = n;
+	let i = $(r.profile?.accountLevel, 1, M.account.maxLevel, 1), a = n;
 	a.profile.accountLevel = i, a.profile.accountXp = $(r.profile?.accountXp, 0, 2e4, 0), a.profile.trophies = $(r.profile?.trophies, 0, 300 + i * 120, 0), a.profile.bestTrophies = Math.max(a.profile.trophies, $(r.profile?.bestTrophies, 0, 300 + i * 120, 0)), a.currencies.coins = $(r.currencies?.coins, 0, 2e4 + i * 3e3, n.currencies.coins), a.currencies.diamonds = $(r.currencies?.diamonds, 0, 60 + i * 25, n.currencies.diamonds);
 	let o = {};
 	for (let [e, n] of Object.entries(r.collection ?? {})) {
 		let r = Number(e);
 		S(r) && n && (o[r] = {
-			level: $(n.level, 1, j.characters.maxLevel, 1),
+			level: $(n.level, 1, M.characters.maxLevel, 1),
 			xp: $(n.xp, 0, 5e3, 0),
 			stars: $(n.stars, 1, 5, 1),
 			fragments: $(n.fragments, 0, 2e3, 0),
@@ -50545,12 +50726,12 @@ function gr(e, t) {
 			copies: $(n.copies, 1, 500, 1)
 		});
 	}
-	for (let e of U) o[e] ??= n.collection[e];
+	for (let e of Wt) o[e] ??= n.collection[e];
 	a.collection = o;
 	let s = Array.isArray(r.squad) ? r.squad.map(Number) : [];
-	a.squad = s.length === 5 && new Set(s).size === 5 && s.every((e) => o[e]) ? s : [...U];
+	a.squad = s.length === 5 && new Set(s).size === 5 && s.every((e) => o[e]) ? s : [...Wt];
 	let c = r.city;
-	return c && Array.isArray(c.buildings) && _r(c.buildings) ? (a.city.buildings = c.buildings.map((e) => ({
+	return c && Array.isArray(c.buildings) && xr(c.buildings) ? (a.city.buildings = c.buildings.map((e) => ({
 		id: String(e.id).slice(0, 40),
 		type: e.type,
 		level: e.level,
@@ -50558,7 +50739,7 @@ function gr(e, t) {
 		z: e.z,
 		rot: e.rot,
 		lastCollectAt: t
-	})), a.city.element = w.includes(c.element) ? c.element : a.city.element, a.city.name = String(c.name ?? a.city.name).slice(0, 24)) : a.city.buildings = Kt(t), a.chests.inventory = (r.chests?.inventory ?? []).filter((e) => dr.has(e?.type)).slice(0, 8).map((e, n) => ({
+	})), a.city.element = w.includes(c.element) ? c.element : a.city.element, a.city.name = String(c.name ?? a.city.name).slice(0, 24)) : a.city.buildings = qt(t), a.chests.inventory = (r.chests?.inventory ?? []).filter((e) => hr.has(e?.type)).slice(0, 8).map((e, n) => ({
 		uid: `imp${n}`,
 		type: e.type,
 		source: "Trazido do aparelho",
@@ -50575,7 +50756,7 @@ function $(e, t, n, r) {
 	let i = Number(e);
 	return Number.isFinite(i) ? Math.max(t, Math.min(n, Math.floor(i))) : r;
 }
-function _r(e) {
+function xr(e) {
 	if (e.length > 200) return !1;
 	let n = [], i = 0;
 	for (let a of e) {
@@ -50598,9 +50779,10 @@ function _r(e) {
 	return !0;
 }
 // src/server/memoryDb.ts
-var vr = class {
+var Sr = class {
 	states = /* @__PURE__ */ new Map();
 	battles = [];
+	duels = /* @__PURE__ */ new Map();
 	seedCounter = 4660;
 	async load(e) {
 		let t = this.states.get(e);
@@ -50608,7 +50790,7 @@ var vr = class {
 	}
 	async store(e, t, n) {
 		let r = this.states.get(e);
-		if (n === null ? r : r?.version !== n) throw new or();
+		if (n === null ? r : r?.version !== n) throw new Y();
 		this.states.set(e, structuredClone(t));
 	}
 	async candidates(e, t) {
@@ -50620,12 +50802,21 @@ var vr = class {
 	async recordBattle(e) {
 		this.battles.push(e);
 	}
+	async loadDuel(e) {
+		let t = this.duels.get(e);
+		return t ? structuredClone(t) : null;
+	}
+	async storeDuel(e, t) {
+		let n = this.duels.get(e.matchId);
+		if (t === null ? n : n?.version !== t) throw new Y();
+		this.duels.set(e.matchId, structuredClone(e));
+	}
 	randomSeed() {
 		return this.seedCounter = Math.imul(this.seedCounter, 1103515245) + 12345 >>> 0, this.seedCounter;
 	}
 };
 // src/content/power.ts
-function yr(e, r) {
+function Cr(e, r) {
 	let i = 0, a = 1 + T(r, "dano_torres") / 100;
 	for (let r of e) {
 		if (r.ruined) continue;
@@ -50636,4 +50827,4 @@ function yr(e, r) {
 	}
 	return Math.round(i);
 }
-export { nr as CLIENT_ACTIONS, or as ConflictError, X as GameError, fr as GameServer, vr as MemoryDb, en as canBeRaided, yr as cityPower, tn as coinsAtRisk, a as coreLevel, mr as playerCity, $t as protection, gr as sanitizeImportedSave, me as squadPower, Z as toClient };
+export { ir as CLIENT_ACTIONS, Y as ConflictError, X as GameError, gr as GameServer, Sr as MemoryDb, tn as canBeRaided, Cr as cityPower, nn as coinsAtRisk, a as coreLevel, vr as playerCity, en as protection, br as sanitizeImportedSave, me as squadPower, Z as toClient };

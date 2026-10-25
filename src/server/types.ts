@@ -1,4 +1,5 @@
 import type { EventRules } from '../content/battleSetup.ts';
+import type { DuelStart } from '../content/duelSetup.ts';
 import type { BotCity } from '../content/botCity.ts';
 import type { BattleContext } from '../meta/raids.ts';
 import type { SaveData } from '../meta/types.ts';
@@ -47,6 +48,17 @@ export interface BattleRecord {
   at: number;
 }
 
+/** Duelo ao vivo: cada jogador manda as jogadas; resolve quando os dois concordam. */
+export interface DuelRecord {
+  matchId: string;
+  start: DuelStart;
+  submissions: Record<string, { commands: TimedCommand[]; hash: number; at: number }>;
+  resolved: boolean;
+  /** Recompensas por jogador (ou motivo de não ter recompensa). */
+  outcome?: Record<string, { rewards: unknown; won: boolean } | { error: string }>;
+  version: number;
+}
+
 export class ConflictError extends Error {
   constructor() {
     super('conflito de versão');
@@ -61,6 +73,9 @@ export interface ServerDb {
   /** Jogadores com troféus parecidos, para o matchmaking (sem o próprio). */
   candidates(userId: string, q: { trophies: number; now: number; limit: number }): Promise<{ userId: string; state: StoredState }[]>;
   recordBattle(rec: BattleRecord): Promise<void>;
+  loadDuel(matchId: string): Promise<DuelRecord | null>;
+  /** Grava se a versão ainda for `expectedVersion` (null = criar). */
+  storeDuel(rec: DuelRecord, expectedVersion: number | null): Promise<void>;
   /** Semente aleatória de verdade (crypto). */
   randomSeed(): number;
 }

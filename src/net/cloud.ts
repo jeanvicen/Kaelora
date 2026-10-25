@@ -1,5 +1,6 @@
 import type { RealtimeChannel, Session, SupabaseClient } from '@supabase/supabase-js';
 import type { EventRules } from '../content/battleSetup.ts';
+import type { DuelStart } from '../content/duelSetup.ts';
 import type { BotCity } from '../content/botCity.ts';
 import type { ActionArgs, ActionName, ActionResult } from '../meta/actions.ts';
 import type { BattleRewards } from '../meta/raids.ts';
@@ -126,6 +127,11 @@ export class CloudClient {
 
   applyRaid(choice?: 'rebuild' | 'retake') {
     return this.call<{ defenses: DefenseLogEntry[]; choice: unknown; save: SaveData }>('apply-raid', { choice });
+  }
+
+  /** Fim do duelo ao vivo: manda as jogadas; resolve quando os dois mandarem. */
+  submitDuel(start: DuelStart, commands: TimedCommand[], hash: number) {
+    return this.call<{ status: 'waiting' | 'resolved'; outcome: { rewards: BattleRewards; won: boolean } | { error: string } | null }>('duel-submit', { start, commands, hash });
   }
 
   claimReward(p: Record<string, unknown>) {

@@ -148,6 +148,28 @@ export class SupabaseDb {
     if (error) console.error('recordBattle', error);
   }
 
+  async loadDuel(matchId: string) {
+    const { data, error } = await this.sb.from('duels').select('record, version').eq('match_id', matchId).maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return { ...(data.record as Any), version: data.version };
+  }
+
+  async storeDuel(rec: Any, expectedVersion: number | null) {
+    const row = { match_id: rec.matchId, record: rec, version: rec.version, updated_at: new Date().toISOString() };
+    if (expectedVersion === null) {
+      const { error } = await this.sb.from('duels').insert(row);
+      if (error) {
+        if (error.code === '23505') throw new ConflictError();
+        throw error;
+      }
+      return;
+    }
+    const { data, error } = await this.sb.from('duels').update(row).eq('match_id', rec.matchId).eq('version', expectedVersion).select('match_id');
+    if (error) throw error;
+    if (!data || data.length === 0) throw new ConflictError();
+  }
+
   randomSeed(): number {
     return crypto.getRandomValues(new Uint32Array(1))[0];
   }

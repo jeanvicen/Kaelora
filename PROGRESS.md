@@ -125,4 +125,17 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 **Bugs conhecidos / observações**
 - Compra de diamantes com dinheiro real não está ligada (precisa de um provedor de pagamento).
 
-## Fase 8 — Multiplayer ao vivo ⏳
+## Fase 8 — Multiplayer ao vivo ✅
+
+**Feito**
+- **Lockstep** (`src/net/lockstep.ts`): os dois aparelhos rodam a MESMA simulação determinística e só as jogadas viajam. Turnos de 3 ticks (100 ms), atraso de entrada de 2 turnos (~200 ms), ordem fixa das jogadas (time 0 primeiro), checagem do hash do estado a cada segundo (desync detectado), cada turno leva junto os 3 anteriores (perda de pacote se recupera sozinha) e pedido de reenvio quando falta um turno.
+- **Reconexão e desconexão**: quando o transporte cai, ao voltar pede o reenvio do que perdeu e continua igual; se o oponente some por 20 s (ou sai), quem ficou vence por **W.O.**; no fim normal não há "bye" (o outro pode estar terminando os últimos ticks).
+- **Pareamento** (`src/net/duelLobby.ts`): lobby onde todos anunciam que procuram; o id menor convida; handshake no canal da partida (perfil do convidado → combinado com semente e os dois esquadrões → confirmação), janela de troféus que abre depois de 15 s e volta a procurar se o oponente não responder.
+- **Transportes** (`src/net/transports.ts`): Supabase Realtime (online de verdade), **BroadcastChannel** (duelo entre duas abas do mesmo aparelho, sem servidor) e par em memória com latência/variação/perda (testes).
+- **Servidor**: Edge Function `duel-submit` + tabela `duels`. Cada jogador manda o combinado e as jogadas; o servidor confere se o esquadrão declarado é o real, espera os dois, exige que as jogadas batam, re-simula e paga cada lado UMA vez (grava antes de pagar). Jogadas diferentes = ninguém ganha.
+- Tela **Duelo ao vivo** (nível 6): procurar oponente online, duelo local em duas abas, treino contra bot; radar de busca, "VS" ao encontrar; cada lado vê o resultado do seu ponto de vista (`BattleSim.resultFor`); no duelo a pausa não congela o tempo.
+- Testes: lockstep com latência e variação (resultado idêntico), 15% de perda, queda de 3 s com reconexão, W.O.; servidor do duelo (concordância, pagamento único, jogadas divergentes, esquadrão falso, intruso) — 96 testes no total. Testado também com duas abas reais no navegador.
+
+**Bugs conhecidos / observações**
+- O duelo online usa o Supabase Realtime: ainda não foi exercitado contra um projeto real (o caminho de duas abas usa o mesmo protocolo e foi testado no navegador).
+

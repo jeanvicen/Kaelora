@@ -17,6 +17,11 @@ import { openEvents } from './ui/screens/events.ts';
 import { openPass } from './ui/screens/pass.ts';
 import { openMore } from './ui/screens/more.ts';
 import { notifyNow, scheduleNotifications } from './core/notify.ts';
+import { duelSetupFrom, type DuelStart } from './content/duelSetup.ts';
+import { Lockstep } from './net/lockstep.ts';
+import type { DuelMatch } from './net/duelLobby.ts';
+import { openDuel } from './ui/screens/duel.ts';
+import type { Team } from './sim/types.ts';
 import type { ChestResult } from './meta/chests.ts';
 import { CloudClient, CloudError, type OnlineTarget } from './net/cloud.ts';
 import { openRevengeWall, revengeCity, showDefenseReport, showRaidChoice } from './ui/screens/defense.ts';
@@ -82,6 +87,7 @@ export class App {
   readonly showroom = new Showroom();
   private overlayStack: ({ kind: 'showroom'; frame: () => DOMRect | null; setup: (s: Showroom) => void } | { kind: 'custom'; overlay: GameOverlay })[] = [];
   private battleCtx: { target: BotCity | null; kind: BattleKind; squad: number[]; revengeId?: string } | null = null;
+  private liveDuel: { start: DuelStart; team: Team; lockstep: Lockstep; mode: 'online' | 'local' } | null = null;
   /** Cliente online (null = jogo 100% offline). */
   cloud: CloudClient | null = null;
   /** Logado e falando com o servidor: moedas, baús e resultados vêm de lá. */
@@ -814,8 +820,12 @@ export class App {
   }
 
   private openPause(): void {
-    this.battle.setPaused(true);
-    this.game.paused = true;
+    // no duelo ao vivo o tempo não para (o oponente continua jogando)
+    const live = !!this.liveDuel;
+    if (!live) {
+      this.battle.setPaused(true);
+      this.game.paused = true;
+    }
     const m = this.ui.modal(
       h(
         'div',
@@ -875,8 +885,11 @@ export class App {
     }
     const replay: Replay = { setup: params.setup, commands: sim.log, hash: result.hash, meta: { attacker: params.setup.teams[0].name, defender: params.setup.teams[1].name, at: Date.now() } };
     const link = `${location.origin}${location.pathname}#replay=${encodeReplay(replay)}`;
+    // duelo: cada um vê o resultado do seu lado; online o servidor confere
+    const shown = params.kind === 'duel' ? (sim.resultFor(params.playerTeam) ?? result) : result;
+    if (params.kind === 'duel' && this.liveDuel) void this.finishLiveDuel(result);
     showResult(this, {
-      result,
+      result: shown,
       rewards,
       title: `${params.setup.teams[0].name} × ${params.setup.teams[1].name}`,
       replayLink: link.length < 12000 ? link : null,
@@ -996,7 +1009,56 @@ export class App {
     openPass(this);
   }
   openDuel(): void {
-    this.ui.toast('O Duelo ao vivo chega já já!', 'info', 'versus');
+    if (!isUnlocked(this.save, 'multiplayer')) return this.ui.toast(`Duelo ao vivo libera no nível de conta ${unlockLevel('multiplayer')}`, 'info', 'lock');
+    openDuel(this);
+  }
+
+  /** Começa o duelo ao vivo já pareado (lockstep pela rede). */
+  startLiveDuel(m: DuelMatch, mode: 'online' | 'local'): void {
+    const lockstep = new Lockstep(m.transport, m.team, {
+      onDesync: () => this.ui.toast('Os aparelhos dessincronizaram: a partida não vai valer prêmio.', 'error'),
+      onAbandon: () => this.ui.toast('O oponente saiu da partida: vitória por W.O.!', 'gold', 'trophy'),
+    });
+    const opp = m.team === 0 ? m.start.guest : m.start.host;
+    this.liveDuel = { start: m.start, team: m.team, lockstep, mode };
+    this.battleCtx = null;
+    this.launchBattle({
+      setup: duelSetupFrom(m.start),
+      playerTeam: m.team,
+      kind: 'duel',
+      external: lockstep,
+      title: { name: opp.name, sub: mode === 'online' ? 'Duelo ao vivo' : 'Duelo local (duas abas)', element: opp.element },
+      timeOfDay: this.city.clock.t,
+    });
+  }
+
+  /** Fim do duelo: online, os dois mandam as jogadas e o servidor paga cada um. */
+  private async finishLiveDuel(result: BattleResult): Promise<void> {
+    const d = this.liveDuel;
+    if (!d) return;
+    this.liveDuel = null;
+    setTimeout(() => d.lockstep.close(), 10_000);
+    if (d.mode !== 'online' || !this.cloud) {
+      this.ui.toast('Duelo local: é treino, sem prêmios.', 'info', 'versus');
+      return;
+    }
+    for (let i = 0; i < 15; i++) {
+      try {
+        const r = await this.cloud.submitDuel(d.start, d.lockstep.log, result.hash);
+        if (r.status === 'resolved') {
+          await this.resync();
+          const o = r.outcome;
+          if (o && 'error' in o) this.ui.toast(`Duelo não validado: ${o.error}`, 'error');
+          else if (o) this.ui.toast(o.won ? `Duelo validado: vitória! ${o.rewards.trophies >= 0 ? '+' : ''}${o.rewards.trophies} troféus` : `Duelo validado: ${o.rewards.trophies} troféus`, o.won ? 'gold' : 'info', 'trophy');
+          return;
+        }
+      } catch (e) {
+        this.ui.toast(`Duelo: ${e instanceof Error ? e.message : e}`, 'error');
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    this.ui.toast('O oponente não confirmou o resultado a tempo.', 'error');
   }
   openSettings(): void {
     openSettings(this);

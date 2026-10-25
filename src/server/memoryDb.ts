@@ -1,9 +1,10 @@
-import { ConflictError, type BattleRecord, type ServerDb, type StoredState } from './types.ts';
+import { ConflictError, type BattleRecord, type DuelRecord, type ServerDb, type StoredState } from './types.ts';
 
 /** Banco em memória (testes e desenvolvimento). Mesmo contrato do Supabase. */
 export class MemoryDb implements ServerDb {
   readonly states = new Map<string, StoredState>();
   readonly battles: BattleRecord[] = [];
+  readonly duels = new Map<string, DuelRecord>();
   private seedCounter = 0x1234;
 
   async load(userId: string): Promise<StoredState | null> {
@@ -26,6 +27,17 @@ export class MemoryDb implements ServerDb {
 
   async recordBattle(rec: BattleRecord): Promise<void> {
     this.battles.push(rec);
+  }
+
+  async loadDuel(matchId: string): Promise<DuelRecord | null> {
+    const d = this.duels.get(matchId);
+    return d ? structuredClone(d) : null;
+  }
+
+  async storeDuel(rec: DuelRecord, expectedVersion: number | null): Promise<void> {
+    const cur = this.duels.get(rec.matchId);
+    if (expectedVersion === null ? !!cur : cur?.version !== expectedVersion) throw new ConflictError();
+    this.duels.set(rec.matchId, structuredClone(rec));
   }
 
   randomSeed(): number {

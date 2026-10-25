@@ -1302,6 +1302,29 @@ export class BattleSim {
     };
   }
 
+  /**
+   * Resultado visto por um time (duelo: o time 1 também tem estrelas,
+   * destruição e dano "do seu lado"). Para o time 0 é o próprio resultado.
+   */
+  resultFor(team: Team): BattleResult | null {
+    const r = this.result;
+    if (!r || team === 0) return r;
+    const other = (t: Team | null): Team | null => (t === null ? null : t === 0 ? 1 : 0);
+    const winner = other(r.winner);
+    const destruction = this.destructionOf(0);
+    const stars = winner === 0 ? 1 + (destruction >= 50 ? 1 : 0) + (r.timeLeftTicks >= 60 * 30 ? 1 : 0) : 0;
+    return {
+      ...r,
+      winner,
+      stars,
+      destruction,
+      coreDestroyed: !this.coreAlive(0),
+      damageDealt: [r.damageDealt[1], r.damageDealt[0]],
+      abilitiesUsed: [r.abilitiesUsed[1], r.abilitiesUsed[0]],
+      ultimatesUsed: [r.ultimatesUsed[1], r.ultimatesUsed[0]],
+    };
+  }
+
   /** Hash do estado inteiro (FNV-1a). Igual em qualquer máquina = sem desync. */
   hash(): number {
     let h = 2166136261 >>> 0;

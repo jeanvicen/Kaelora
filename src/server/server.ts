@@ -20,8 +20,9 @@ import type { DefenseLogEntry, Element, PlacedBuilding, SaveData } from '../meta
 import { runBattle } from '../sim/battle.ts';
 import { encodeReplay } from '../sim/replay.ts';
 import { hashString } from '../sim/rng.ts';
-import type { TimedCommand } from '../sim/types.ts';
-import { ConflictError, GameError, type ActiveBattle, type ServerDb, type StoredState, type TargetRef } from './types.ts';
+import type { Team, TimedCommand } from '../sim/types.ts';
+import { duelProfileOf, duelSetupFrom, type DuelStart } from '../content/duelSetup.ts';
+import { ConflictError, GameError, type ActiveBattle, type DuelRecord, type ServerDb, type StoredState, type TargetRef } from './types.ts';
 
 const HOUR = 3_600_000;
 const TARGETS_TTL = 6 * HOUR;
@@ -275,6 +276,86 @@ export class GameServer {
     return { ...out, save: toClient(st.save) };
   }
 
+  /**
+   * Duelo ao vivo (`duel-submit`): cada jogador manda o combinado e as jogadas
+   * dos dois lados. Quando os dois enviaram e as jogadas batem, o servidor
+   * re-simula e aplica o resultado de cada um. Se não baterem, ninguém ganha.
+   */
+  async submitDuel(userId: string, raw: unknown) {
+    const body = raw as { start?: DuelStart; commands?: unknown; hash?: unknown };
+    const start = body?.start;
+    if (!start || typeof start.matchId !== 'string' || start.matchId.length > 80 || !start.host || !start.guest) throw new GameError('Duelo inválido');
+    const team: Team | null = start.host.id === userId ? 0 : start.guest.id === userId ? 1 : null;
+    if (team === null) throw new GameError('Você não está neste duelo', 403);
+    if (start.host.id === start.guest.id) throw new GameError('Duelo inválido');
+    // o esquadrão declarado tem que ser o mesmo que o servidor conhece
+    const me = await this.db.load(userId);
+    if (!me) throw new GameError('Jogador não encontrado', 404);
+    const mine = team === 0 ? start.host : start.guest;
+    const real = duelProfileOf(me.save, userId);
+    const same = JSON.stringify(real.squad) === JSON.stringify(mine.squad) && real.squad.every((id) => real.levels[id].level === mine.levels?.[id]?.level && real.levels[id].stars === mine.levels?.[id]?.stars);
+    if (!same) throw new GameError('Seu esquadrão não confere com o servidor');
+    const commands = sanitizeCommands(body.commands, true);
+    const hash = typeof body.hash === 'number' ? body.hash : 0;
+    const now = this.clock();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const cur = await this.db.loadDuel(start.matchId);
+      if (cur?.resolved) return { status: 'resolved' as const, outcome: cur.outcome?.[userId] ?? null };
+      const rec: DuelRecord = cur ?? { matchId: start.matchId, start, submissions: {}, resolved: false, version: 0 };
+      if (JSON.stringify(rec.start) !== JSON.stringify(start)) throw new GameError('Combinado do duelo diferente do adversário');
+      rec.submissions[userId] = { commands, hash, at: now };
+      const ids = [start.host.id, start.guest.id];
+      const both = ids.every((id) => rec.submissions[id]);
+      const prev = cur ? cur.version : null;
+      rec.resolved = both;
+      rec.version = (prev ?? 0) + 1;
+      try {
+        // grava ANTES de pagar: um envio concorrente nunca resolve duas vezes
+        await this.db.storeDuel(rec, prev);
+      } catch (e) {
+        if (e instanceof ConflictError) continue;
+        throw e;
+      }
+      if (!both) return { status: 'waiting' as const, outcome: null };
+      const outcome = await this.resolveDuel(rec);
+      // guarda o resultado de cada um (para quem perguntar depois)
+      for (let k = 0; k < 4; k++) {
+        const latest = await this.db.loadDuel(start.matchId);
+        if (!latest) break;
+        latest.outcome = outcome;
+        const v = latest.version;
+        latest.version = v + 1;
+        try {
+          await this.db.storeDuel(latest, v);
+          break;
+        } catch (e) {
+          if (!(e instanceof ConflictError)) throw e;
+        }
+      }
+      return { status: 'resolved' as const, outcome: outcome[userId] ?? null };
+    }
+    throw new GameError('Servidor ocupado, tente de novo', 409);
+  }
+
+  private async resolveDuel(rec: DuelRecord): Promise<NonNullable<DuelRecord['outcome']>> {
+    const start = rec.start;
+    const ids = [start.host.id, start.guest.id];
+    const outcome: NonNullable<DuelRecord['outcome']> = {};
+    const [ha, hb] = ids.map((id) => rec.submissions[id]);
+    if (JSON.stringify(ha.commands) !== JSON.stringify(hb.commands)) {
+      for (const id of ids) outcome[id] = { error: 'As jogadas dos dois aparelhos não batem' };
+      return outcome;
+    }
+    const { sim } = runBattle(duelSetupFrom(start), ha.commands);
+    for (const [t, id] of [[0, start.host.id] as const, [1, start.guest.id] as const]) {
+      const result = sim.resultFor(t)!;
+      const o = t === 0 ? start.guest : start.host;
+      const { out } = await this.withState(id, (s, n) => applyBattleResult(s.save, { kind: 'duel', target: { loot: 0, coreLevel: o.coreLevel, trophies: o.trophies }, result, squad: [...s.save.squad], now: n }));
+      outcome[id] = { rewards: out, won: result.winner === 0 };
+    }
+    return outcome;
+  }
+
   /** Invasões pendentes e a escolha da cidade saqueada (`apply-raid`). */
   async applyRaid(userId: string, rawArgs: unknown) {
     const a = checkArgs(rawArgs) as { choice?: 'rebuild' | 'retake' };
@@ -309,7 +390,7 @@ export function playerCity(userId: string, save: SaveData): BotCity {
   };
 }
 
-function sanitizeCommands(raw: unknown): TimedCommand[] {
+function sanitizeCommands(raw: unknown, bothTeams = false): TimedCommand[] {
   if (!Array.isArray(raw)) return [];
   const out: TimedCommand[] = [];
   for (const c of raw.slice(0, 2000)) {
@@ -317,13 +398,15 @@ function sanitizeCommands(raw: unknown): TimedCommand[] {
     const tick = Number((c as TimedCommand).tick);
     const cmd = (c as TimedCommand).cmd as { t?: string; slot?: number };
     if (!Number.isInteger(tick) || tick < 0 || tick > 30 * 60 * 10 || !cmd || typeof cmd.t !== 'string') continue;
-    // o cliente só joga pelo time 0 (atacante)
+    // invasão: o cliente só joga pelo time 0 (atacante); duelo: os dois times
+    const team: Team = bothTeams && (c as TimedCommand).team === 1 ? 1 : 0;
     if (cmd.t === 'deploy' || cmd.t === 'ability') {
       if (!Number.isInteger(cmd.slot) || cmd.slot! < 0 || cmd.slot! > 4) continue;
-      out.push({ tick, team: 0, cmd: { t: cmd.t, slot: cmd.slot! } as TimedCommand['cmd'] });
-    } else if (cmd.t === 'ultimate' || cmd.t === 'surrender') out.push({ tick, team: 0, cmd: { t: cmd.t } as TimedCommand['cmd'] });
+      out.push({ tick, team, cmd: { t: cmd.t, slot: cmd.slot! } as TimedCommand['cmd'] });
+    } else if (cmd.t === 'ultimate' || cmd.t === 'surrender') out.push({ tick, team, cmd: { t: cmd.t } as TimedCommand['cmd'] });
   }
-  return out.sort((a, b) => a.tick - b.tick);
+  // ordem estável: tick, depois time 0 antes do 1 (igual ao lockstep)
+  return out.map((c, i) => ({ c, i })).sort((a, b) => a.c.tick - b.c.tick || a.c.team - b.c.team || a.i - b.i).map((x) => x.c);
 }
 
 /**
