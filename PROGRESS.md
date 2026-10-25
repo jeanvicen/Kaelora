@@ -139,3 +139,14 @@ Registro do andamento por fase (seção 15 do `CLAUDE.md`). Atualizado ao fim de
 **Bugs conhecidos / observações**
 - O duelo online usa o Supabase Realtime: ainda não foi exercitado contra um projeto real (o caminho de duas abas usa o mesmo protocolo e foi testado no navegador).
 
+
+## Entrega final
+
+**Feito**
+- `README.md` completo em pt-BR: galeria, tudo que tem no jogo, controles, instalação do PWA no Android/iPhone/computador, como rodar, scripts, arquitetura (com diagrama), passo a passo do modo online no Supabase, publicação na Vercel, arquivos de balanceamento, testes e limitações conhecidas.
+- Capturas de tela em `docs/screenshots/` (JPG leve, 844×390).
+
+**Próximos passos sugeridos**
+- Criar o projeto Supabase real, aplicar as migrações, publicar as Edge Functions e exercitar o online (PvP, saque e duelo) de ponta a ponta.
+- Publicar na Vercel e testar a instalação do PWA em celulares de verdade (Android e iPhone).
+- Web Push para notificações com o app fechado e provedor de pagamento para os pacotes de diamantes.
