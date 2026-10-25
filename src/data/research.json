@@ -1,0 +1,14 @@
+{
+  "$schema": "Kaelora research v1 — custos em moedas, tempos em segundos; o nível máximo de cada pesquisa é limitado pelo nível do Laboratório",
+  "research": [
+    { "id": "energia_inicial", "name": "Energia Inicial", "description": "+1 de energia no começo de cada batalha.", "perLevel": 1, "unit": "energia", "maxLevel": 3, "costs": [3000, 9000, 24000], "times": [600, 3600, 14400] },
+    { "id": "recarga_energia", "name": "Reator de Energia", "description": "A energia recarrega mais rápido.", "perLevel": 5, "unit": "%", "maxLevel": 5, "costs": [2500, 6000, 14000, 30000, 60000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "vida_esquadrao", "name": "Armaduras Reforçadas", "description": "Mais vida para todo o esquadrão.", "perLevel": 4, "unit": "%", "maxLevel": 5, "costs": [2000, 5000, 12000, 26000, 52000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "dano_esquadrao", "name": "Armas Calibradas", "description": "Mais dano para todo o esquadrão.", "perLevel": 4, "unit": "%", "maxLevel": 5, "costs": [2000, 5000, 12000, 26000, 52000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "recarga_cartas", "name": "Teletransporte Rápido", "description": "As cartas voltam para a mão mais cedo.", "perLevel": 6, "unit": "%", "maxLevel": 5, "costs": [1800, 4500, 11000, 24000, 48000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "carga_ultimate", "name": "Núcleo Portátil", "description": "O Ultimate enche mais rápido.", "perLevel": 6, "unit": "%", "maxLevel": 5, "costs": [3000, 7000, 16000, 34000, 68000], "times": [600, 3600, 10800, 21600, 43200] },
+    { "id": "vida_barreiras", "name": "Concreto Neon", "description": "Mais vida para as Barreiras da sua cidade.", "perLevel": 8, "unit": "%", "maxLevel": 5, "costs": [1500, 4000, 10000, 22000, 45000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "dano_torres", "name": "Munição de Plasma", "description": "Mais dano para as torres da sua cidade.", "perLevel": 5, "unit": "%", "maxLevel": 5, "costs": [2500, 6000, 14000, 30000, 60000], "times": [300, 1800, 7200, 14400, 28800] },
+    { "id": "vida_nucleo", "name": "Cristal Blindado", "description": "Mais vida para o Núcleo.", "perLevel": 8, "unit": "%", "maxLevel": 5, "costs": [3000, 7000, 16000, 34000, 68000], "times": [600, 3600, 10800, 21600, 43200] }
+  ]
+}

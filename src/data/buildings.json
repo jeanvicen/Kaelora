@@ -30,80 +30,80 @@
       },
       "levels": [
         {
-          "hp": 3600,
-          "dmg": 32,
+          "hp": 6250,
+          "dmg": 90,
           "interval": 1.4,
           "range": 5.5,
           "cost": 0,
           "time": 0
         },
         {
-          "hp": 4300,
-          "dmg": 37,
+          "hp": 7500,
+          "dmg": 104,
           "interval": 1.4,
           "range": 5.5,
           "cost": 1200,
           "time": 60
         },
         {
-          "hp": 5200,
-          "dmg": 43,
+          "hp": 9000,
+          "dmg": 121,
           "interval": 1.4,
           "range": 5.5,
           "cost": 2500,
           "time": 300
         },
         {
-          "hp": 6200,
-          "dmg": 50,
+          "hp": 10800,
+          "dmg": 140,
           "interval": 1.4,
           "range": 5.5,
           "cost": 5000,
           "time": 900
         },
         {
-          "hp": 7450,
-          "dmg": 58,
+          "hp": 12950,
+          "dmg": 163,
           "interval": 1.4,
           "range": 5.5,
           "cost": 10300,
           "time": 1800
         },
         {
-          "hp": 8950,
-          "dmg": 67,
+          "hp": 15550,
+          "dmg": 189,
           "interval": 1.4,
           "range": 5.5,
           "cost": 21200,
           "time": 3600
         },
         {
-          "hp": 10750,
-          "dmg": 78,
+          "hp": 18650,
+          "dmg": 219,
           "interval": 1.4,
           "range": 5.5,
           "cost": 43400,
           "time": 7200
         },
         {
-          "hp": 12900,
-          "dmg": 90,
+          "hp": 22350,
+          "dmg": 254,
           "interval": 1.4,
           "range": 5.5,
           "cost": 89100,
           "time": 14400
         },
         {
-          "hp": 15500,
-          "dmg": 105,
+          "hp": 26850,
+          "dmg": 295,
           "interval": 1.4,
           "range": 5.5,
           "cost": 182600,
           "time": 28800
         },
         {
-          "hp": 18600,
-          "dmg": 122,
+          "hp": 32200,
+          "dmg": 342,
           "interval": 1.4,
           "range": 5.5,
           "cost": 374300,
@@ -138,52 +138,52 @@
       },
       "levels": [
         {
-          "hp": 700,
+          "hp": 1140,
           "cost": 60,
           "time": 0
         },
         {
-          "hp": 850,
+          "hp": 1390,
           "cost": 105,
           "time": 5
         },
         {
-          "hp": 1040,
+          "hp": 1700,
           "cost": 185,
           "time": 15
         },
         {
-          "hp": 1270,
+          "hp": 2070,
           "cost": 320,
           "time": 75
         },
         {
-          "hp": 1550,
+          "hp": 2530,
           "cost": 565,
           "time": 225
         },
         {
-          "hp": 1890,
+          "hp": 3080,
           "cost": 985,
           "time": 450
         },
         {
-          "hp": 2310,
+          "hp": 3760,
           "cost": 1725,
           "time": 900
         },
         {
-          "hp": 2820,
+          "hp": 4590,
           "cost": 3015,
           "time": 1800
         },
         {
-          "hp": 3440,
+          "hp": 5590,
           "cost": 5280,
           "time": 3600
         },
         {
-          "hp": 4190,
+          "hp": 6830,
           "cost": 9235,
           "time": 7200
         }
@@ -217,80 +217,80 @@
       },
       "levels": [
         {
-          "hp": 900,
-          "dmg": 62,
+          "hp": 1620,
+          "dmg": 156,
           "interval": 1.6,
           "range": 6,
           "cost": 250,
           "time": 0
         },
         {
-          "hp": 1060,
-          "dmg": 73,
+          "hp": 1910,
+          "dmg": 183,
           "interval": 1.6,
           "range": 6,
           "cost": 480,
           "time": 20
         },
         {
-          "hp": 1250,
-          "dmg": 85,
+          "hp": 2260,
+          "dmg": 214,
           "interval": 1.6,
           "range": 6,
           "cost": 900,
           "time": 60
         },
         {
-          "hp": 1480,
-          "dmg": 99,
+          "hp": 2660,
+          "dmg": 250,
           "interval": 1.6,
           "range": 6,
           "cost": 1710,
           "time": 300
         },
         {
-          "hp": 1740,
-          "dmg": 116,
+          "hp": 3140,
+          "dmg": 292,
           "interval": 1.6,
           "range": 6,
           "cost": 3260,
           "time": 900
         },
         {
-          "hp": 2060,
-          "dmg": 136,
+          "hp": 3710,
+          "dmg": 342,
           "interval": 1.6,
           "range": 6,
           "cost": 6190,
           "time": 1800
         },
         {
-          "hp": 2430,
-          "dmg": 159,
+          "hp": 4370,
+          "dmg": 400,
           "interval": 1.6,
           "range": 6,
           "cost": 11760,
           "time": 3600
         },
         {
-          "hp": 2870,
-          "dmg": 186,
+          "hp": 5160,
+          "dmg": 468,
           "interval": 1.6,
           "range": 6,
           "cost": 22350,
           "time": 7200
         },
         {
-          "hp": 3380,
-          "dmg": 218,
+          "hp": 6090,
+          "dmg": 548,
           "interval": 1.6,
           "range": 6,
           "cost": 42460,
           "time": 14400
         },
         {
-          "hp": 3990,
-          "dmg": 255,
+          "hp": 7190,
+          "dmg": 641,
           "interval": 1.6,
           "range": 6,
           "cost": 80670,
@@ -325,80 +325,80 @@
       },
       "levels": [
         {
-          "hp": 760,
-          "dmg": 21,
+          "hp": 1380,
+          "dmg": 50,
           "interval": 0.45,
           "range": 6.5,
           "cost": 400,
           "time": 0
         },
         {
-          "hp": 900,
-          "dmg": 25,
+          "hp": 1630,
+          "dmg": 59,
           "interval": 0.45,
           "range": 6.5,
           "cost": 760,
           "time": 20
         },
         {
-          "hp": 1060,
-          "dmg": 29,
+          "hp": 1920,
+          "dmg": 68,
           "interval": 0.45,
           "range": 6.5,
           "cost": 1440,
           "time": 60
         },
         {
-          "hp": 1250,
-          "dmg": 34,
+          "hp": 2270,
+          "dmg": 80,
           "interval": 0.45,
           "range": 6.5,
           "cost": 2740,
           "time": 300
         },
         {
-          "hp": 1470,
-          "dmg": 39,
+          "hp": 2680,
+          "dmg": 94,
           "interval": 0.45,
           "range": 6.5,
           "cost": 5210,
           "time": 900
         },
         {
-          "hp": 1740,
-          "dmg": 46,
+          "hp": 3160,
+          "dmg": 110,
           "interval": 0.45,
           "range": 6.5,
           "cost": 9900,
           "time": 1800
         },
         {
-          "hp": 2050,
-          "dmg": 54,
+          "hp": 3730,
+          "dmg": 128,
           "interval": 0.45,
           "range": 6.5,
           "cost": 18820,
           "time": 3600
         },
         {
-          "hp": 2420,
-          "dmg": 63,
+          "hp": 4400,
+          "dmg": 150,
           "interval": 0.45,
           "range": 6.5,
           "cost": 35750,
           "time": 7200
         },
         {
-          "hp": 2860,
-          "dmg": 74,
+          "hp": 5190,
+          "dmg": 176,
           "interval": 0.45,
           "range": 6.5,
           "cost": 67930,
           "time": 14400
         },
         {
-          "hp": 3370,
-          "dmg": 86,
+          "hp": 6120,
+          "dmg": 205,
           "interval": 0.45,
           "range": 6.5,
           "cost": 129080,
@@ -434,8 +434,8 @@
       },
       "levels": [
         {
-          "hp": 820,
-          "dmg": 14,
+          "hp": 1500,
+          "dmg": 36,
           "interval": 1,
           "range": 5.5,
           "slow": 30,
@@ -443,8 +443,8 @@
           "time": 0
         },
         {
-          "hp": 970,
-          "dmg": 16,
+          "hp": 1770,
+          "dmg": 42,
           "interval": 1,
           "range": 5.5,
           "slow": 33,
@@ -452,8 +452,8 @@
           "time": 20
         },
         {
-          "hp": 1140,
-          "dmg": 19,
+          "hp": 2090,
+          "dmg": 48,
           "interval": 1,
           "range": 5.5,
           "slow": 36,
@@ -461,8 +461,8 @@
           "time": 60
         },
         {
-          "hp": 1350,
-          "dmg": 22,
+          "hp": 2460,
+          "dmg": 56,
           "interval": 1,
           "range": 5.5,
           "slow": 39,
@@ -470,8 +470,8 @@
           "time": 300
         },
         {
-          "hp": 1590,
-          "dmg": 25,
+          "hp": 2910,
+          "dmg": 65,
           "interval": 1,
           "range": 5.5,
           "slow": 42,
@@ -479,8 +479,8 @@
           "time": 900
         },
         {
-          "hp": 1880,
-          "dmg": 29,
+          "hp": 3430,
+          "dmg": 76,
           "interval": 1,
           "range": 5.5,
           "slow": 45,
@@ -488,8 +488,8 @@
           "time": 1800
         },
         {
-          "hp": 2210,
-          "dmg": 34,
+          "hp": 4050,
+          "dmg": 88,
           "interval": 1,
           "range": 5.5,
           "slow": 48,
@@ -497,8 +497,8 @@
           "time": 3600
         },
         {
-          "hp": 2610,
-          "dmg": 40,
+          "hp": 4780,
+          "dmg": 102,
           "interval": 1,
           "range": 5.5,
           "slow": 51,
@@ -506,8 +506,8 @@
           "time": 7200
         },
         {
-          "hp": 3080,
-          "dmg": 46,
+          "hp": 5640,
+          "dmg": 118,
           "interval": 1,
           "range": 5.5,
           "slow": 54,
@@ -515,8 +515,8 @@
           "time": 14400
         },
         {
-          "hp": 3640,
-          "dmg": 53,
+          "hp": 6650,
+          "dmg": 137,
           "interval": 1,
           "range": 5.5,
           "slow": 57,
@@ -553,8 +553,8 @@
       },
       "levels": [
         {
-          "hp": 860,
-          "dmg": 46,
+          "hp": 1560,
+          "dmg": 118,
           "interval": 1.5,
           "range": 5,
           "chain": 3,
@@ -562,8 +562,8 @@
           "time": 0
         },
         {
-          "hp": 1010,
-          "dmg": 54,
+          "hp": 1840,
+          "dmg": 138,
           "interval": 1.5,
           "range": 5,
           "chain": 3,
@@ -571,8 +571,8 @@
           "time": 20
         },
         {
-          "hp": 1200,
-          "dmg": 63,
+          "hp": 2170,
+          "dmg": 162,
           "interval": 1.5,
           "range": 5,
           "chain": 3,
@@ -580,8 +580,8 @@
           "time": 60
         },
         {
-          "hp": 1410,
-          "dmg": 74,
+          "hp": 2560,
+          "dmg": 189,
           "interval": 1.5,
           "range": 5,
           "chain": 3,
@@ -589,8 +589,8 @@
           "time": 300
         },
         {
-          "hp": 1670,
-          "dmg": 86,
+          "hp": 3020,
+          "dmg": 221,
           "interval": 1.5,
           "range": 5,
           "chain": 4,
@@ -598,8 +598,8 @@
           "time": 900
         },
         {
-          "hp": 1970,
-          "dmg": 101,
+          "hp": 3570,
+          "dmg": 259,
           "interval": 1.5,
           "range": 5,
           "chain": 4,
@@ -607,8 +607,8 @@
           "time": 1800
         },
         {
-          "hp": 2320,
-          "dmg": 118,
+          "hp": 4210,
+          "dmg": 303,
           "interval": 1.5,
           "range": 5,
           "chain": 4,
@@ -616,8 +616,8 @@
           "time": 3600
         },
         {
-          "hp": 2740,
-          "dmg": 138,
+          "hp": 4970,
+          "dmg": 354,
           "interval": 1.5,
           "range": 5,
           "chain": 4,
@@ -625,8 +625,8 @@
           "time": 7200
         },
         {
-          "hp": 3230,
-          "dmg": 162,
+          "hp": 5860,
+          "dmg": 414,
           "interval": 1.5,
           "range": 5,
           "chain": 5,
@@ -634,8 +634,8 @@
           "time": 14400
         },
         {
-          "hp": 3810,
-          "dmg": 189,
+          "hp": 6920,
+          "dmg": 485,
           "interval": 1.5,
           "range": 5,
           "chain": 5,
@@ -673,80 +673,80 @@
       },
       "levels": [
         {
-          "hp": 1000,
-          "dmg": 115,
+          "hp": 1800,
+          "dmg": 282,
           "interval": 3.6,
           "range": 11,
           "cost": 1500,
           "time": 0
         },
         {
-          "hp": 1180,
-          "dmg": 135,
+          "hp": 2120,
+          "dmg": 330,
           "interval": 3.6,
           "range": 11,
           "cost": 2780,
           "time": 20
         },
         {
-          "hp": 1390,
-          "dmg": 157,
+          "hp": 2510,
+          "dmg": 386,
           "interval": 3.6,
           "range": 11,
           "cost": 5130,
           "time": 60
         },
         {
-          "hp": 1640,
-          "dmg": 184,
+          "hp": 2960,
+          "dmg": 452,
           "interval": 3.6,
           "range": 11,
           "cost": 9500,
           "time": 300
         },
         {
-          "hp": 1940,
-          "dmg": 215,
+          "hp": 3490,
+          "dmg": 528,
           "interval": 3.6,
           "range": 11,
           "cost": 17570,
           "time": 900
         },
         {
-          "hp": 2290,
-          "dmg": 252,
+          "hp": 4120,
+          "dmg": 618,
           "interval": 3.6,
           "range": 11,
           "cost": 32500,
           "time": 1800
         },
         {
-          "hp": 2700,
-          "dmg": 295,
+          "hp": 4860,
+          "dmg": 723,
           "interval": 3.6,
           "range": 11,
           "cost": 60130,
           "time": 3600
         },
         {
-          "hp": 3190,
-          "dmg": 345,
+          "hp": 5730,
+          "dmg": 846,
           "interval": 3.6,
           "range": 11,
           "cost": 111250,
           "time": 7200
         },
         {
-          "hp": 3760,
-          "dmg": 404,
+          "hp": 6770,
+          "dmg": 990,
           "interval": 3.6,
           "range": 11,
           "cost": 205810,
           "time": 14400
         },
         {
-          "hp": 4440,
-          "dmg": 472,
+          "hp": 7980,
+          "dmg": 1159,
           "interval": 3.6,
           "range": 11,
           "cost": 380750,
@@ -784,61 +784,61 @@
       "levels": [
         {
           "hp": 1,
-          "dmg": 380,
+          "dmg": 624,
           "cost": 300,
           "time": 0
         },
         {
           "hp": 1,
-          "dmg": 456,
+          "dmg": 749,
           "cost": 540,
           "time": 7
         },
         {
           "hp": 1,
-          "dmg": 547,
+          "dmg": 899,
           "cost": 970,
           "time": 20
         },
         {
           "hp": 1,
-          "dmg": 657,
+          "dmg": 1078,
           "cost": 1750,
           "time": 100
         },
         {
           "hp": 1,
-          "dmg": 788,
+          "dmg": 1294,
           "cost": 3150,
           "time": 300
         },
         {
           "hp": 1,
-          "dmg": 946,
+          "dmg": 1553,
           "cost": 5670,
           "time": 600
         },
         {
           "hp": 1,
-          "dmg": 1135,
+          "dmg": 1863,
           "cost": 10200,
           "time": 1200
         },
         {
           "hp": 1,
-          "dmg": 1362,
+          "dmg": 2236,
           "cost": 18370,
           "time": 2400
         },
         {
           "hp": 1,
-          "dmg": 1634,
+          "dmg": 2683,
           "cost": 33060,
           "time": 4800
         },
         {
           "hp": 1,
-          "dmg": 1961,
+          "dmg": 3220,
           "cost": 59510,
           "time": 9600
         }
@@ -870,70 +870,70 @@
       },
       "levels": [
         {
-          "hp": 620,
+          "hp": 1140,
           "rate": 300,
           "capacity": 1200,
           "cost": 150,
           "time": 0
         },
         {
-          "hp": 720,
+          "hp": 1320,
           "rate": 400,
           "capacity": 1750,
           "cost": 290,
           "time": 20
         },
         {
-          "hp": 830,
+          "hp": 1530,
           "rate": 520,
           "capacity": 2500,
           "cost": 570,
           "time": 60
         },
         {
-          "hp": 970,
+          "hp": 1780,
           "rate": 690,
           "capacity": 3650,
           "cost": 1110,
           "time": 300
         },
         {
-          "hp": 1120,
+          "hp": 2060,
           "rate": 910,
           "capacity": 5300,
           "cost": 2170,
           "time": 900
         },
         {
-          "hp": 1300,
+          "hp": 2390,
           "rate": 1200,
           "capacity": 7700,
           "cost": 4230,
           "time": 1800
         },
         {
-          "hp": 1510,
+          "hp": 2780,
           "rate": 1590,
           "capacity": 11150,
           "cost": 8250,
           "time": 3600
         },
         {
-          "hp": 1750,
+          "hp": 3220,
           "rate": 2090,
           "capacity": 16150,
           "cost": 16080,
           "time": 7200
         },
         {
-          "hp": 2030,
+          "hp": 3740,
           "rate": 2770,
           "capacity": 23450,
           "cost": 31360,
           "time": 14400
         },
         {
-          "hp": 2360,
+          "hp": 4340,
           "rate": 3650,
           "capacity": 34000,
           "cost": 61150,
@@ -967,70 +967,70 @@
       },
       "levels": [
         {
-          "hp": 1300,
+          "hp": 2280,
           "protect": 30,
           "protectCap": 4000,
           "cost": 600,
           "time": 0
         },
         {
-          "hp": 1520,
+          "hp": 2670,
           "protect": 34,
           "protectCap": 6400,
           "cost": 1170,
           "time": 20
         },
         {
-          "hp": 1780,
+          "hp": 3120,
           "protect": 38,
           "protectCap": 10200,
           "cost": 2280,
           "time": 60
         },
         {
-          "hp": 2080,
+          "hp": 3650,
           "protect": 42,
           "protectCap": 16400,
           "cost": 4450,
           "time": 300
         },
         {
-          "hp": 2440,
+          "hp": 4270,
           "protect": 46,
           "protectCap": 26200,
           "cost": 8680,
           "time": 900
         },
         {
-          "hp": 2850,
+          "hp": 5000,
           "protect": 50,
           "protectCap": 41900,
           "cost": 16920,
           "time": 1800
         },
         {
-          "hp": 3330,
+          "hp": 5850,
           "protect": 54,
           "protectCap": 67100,
           "cost": 32990,
           "time": 3600
         },
         {
-          "hp": 3900,
+          "hp": 6840,
           "protect": 58,
           "protectCap": 107400,
           "cost": 64330,
           "time": 7200
         },
         {
-          "hp": 4560,
+          "hp": 8010,
           "protect": 62,
           "protectCap": 171800,
           "cost": 125440,
           "time": 14400
         },
         {
-          "hp": 5340,
+          "hp": 9370,
           "protect": 66,
           "protectCap": 274900,
           "cost": 244600,
@@ -1064,61 +1064,61 @@
       },
       "levels": [
         {
-          "hp": 1500,
+          "hp": 2640,
           "maxCharLevel": 6,
           "cost": 500,
           "time": 0
         },
         {
-          "hp": 1760,
+          "hp": 3090,
           "maxCharLevel": 9,
           "cost": 1000,
           "time": 20
         },
         {
-          "hp": 2050,
+          "hp": 3610,
           "maxCharLevel": 12,
           "cost": 2000,
           "time": 60
         },
         {
-          "hp": 2400,
+          "hp": 4230,
           "maxCharLevel": 15,
           "cost": 4000,
           "time": 300
         },
         {
-          "hp": 2810,
+          "hp": 4950,
           "maxCharLevel": 18,
           "cost": 8000,
           "time": 900
         },
         {
-          "hp": 3290,
+          "hp": 5790,
           "maxCharLevel": 21,
           "cost": 16000,
           "time": 1800
         },
         {
-          "hp": 3850,
+          "hp": 6770,
           "maxCharLevel": 24,
           "cost": 32000,
           "time": 3600
         },
         {
-          "hp": 4500,
+          "hp": 7920,
           "maxCharLevel": 27,
           "cost": 64000,
           "time": 7200
         },
         {
-          "hp": 5270,
+          "hp": 9270,
           "maxCharLevel": 30,
           "cost": 128000,
           "time": 14400
         },
         {
-          "hp": 6160,
+          "hp": 10850,
           "maxCharLevel": 30,
           "cost": 256000,
           "time": 28800
@@ -1151,61 +1151,61 @@
       },
       "levels": [
         {
-          "hp": 1400,
+          "hp": 2520,
           "maxResearch": 1,
           "cost": 2000,
           "time": 0
         },
         {
-          "hp": 1640,
+          "hp": 2950,
           "maxResearch": 2,
           "cost": 3800,
           "time": 20
         },
         {
-          "hp": 1920,
+          "hp": 3450,
           "maxResearch": 3,
           "cost": 7220,
           "time": 60
         },
         {
-          "hp": 2240,
+          "hp": 4040,
           "maxResearch": 4,
           "cost": 13720,
           "time": 300
         },
         {
-          "hp": 2620,
+          "hp": 4720,
           "maxResearch": 5,
           "cost": 26060,
           "time": 900
         },
         {
-          "hp": 3070,
+          "hp": 5520,
           "maxResearch": 6,
           "cost": 49520,
           "time": 1800
         },
         {
-          "hp": 3590,
+          "hp": 6460,
           "maxResearch": 7,
           "cost": 94090,
           "time": 3600
         },
         {
-          "hp": 4200,
+          "hp": 7560,
           "maxResearch": 8,
           "cost": 178770,
           "time": 7200
         },
         {
-          "hp": 4920,
+          "hp": 8850,
           "maxResearch": 9,
           "cost": 339670,
           "time": 14400
         },
         {
-          "hp": 5750,
+          "hp": 10350,
           "maxResearch": 10,
           "cost": 645380,
           "time": 28800
